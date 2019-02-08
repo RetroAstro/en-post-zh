@@ -35,7 +35,7 @@ spoiler: 我们可以这样做，但并不意味着我们应该这样做。
 
 在多个自定义 Hooks 中调用 `useState()` 并不会发生冲突。
 
-​```js
+```js
 function useMyCustomHook1() {
   const [value, setValue] = useState(0);
   // 此处的 state 并不会被外部的 state 影响。
@@ -51,7 +51,7 @@ function MyComponent() {
   useMyCustomHook2();
   // ...
 }
-​```
+```
 
 添加一个新的不在条件判断语句中的 `useState()` 调用总是安全的，你不需要了解组件通过其他 Hooks 声明的新 state 变量。你也不能通过更新其中一个来影响其他 state 变量。
 
@@ -61,7 +61,7 @@ function MyComponent() {
 
 Hooks 之所以有用是因为你可以在它们之间传递值。
 
-​```js{4,12,14}
+```js{4,12,14}
 function useWindowWidth() {
   const [width, setWidth] = useState(window.innerWidth);
   // ...
@@ -82,7 +82,7 @@ function Comment() {
     </section>
   );
 }
-​```
+```
 
 要是上面的代码出错了怎么办？我们该如何通过调试找到错误呢？
 
@@ -108,18 +108,18 @@ function Comment() {
 
 `React.memo()` 以组件作为传入参数并且会返回一个新的组件：
 
-​```js{4}
+```js{4}
 function Button(props) {
   // ...
 }
 export default React.memo(Button);
-​```
+```
 
 **但是为什么它不能作为一个 Hook 使用呢？**
 
 不管你称它为 `useShouldComponentUpdate()`、`usePure()`、`useSkipRender()` 或者 `useBailout()`，最终的形式都会像这样：
 
-​```js
+```js
 function Button({ color }) {
   // ⚠️ 不是真正的 API
   useBailout(prevColor => prevColor !== color, color);
@@ -130,7 +130,7 @@ function Button({ color }) {
     </button>
   )
 }
-​```
+```
 
 在命名上可能稍有不同 (例如还可以称为 `usePure()`) 但是总的来说它们都有相同的缺陷。
 
@@ -138,7 +138,7 @@ function Button({ color }) {
 
 假设我们尝试着将 `useBailout()` 放入两个自定义 Hooks：
 
-​```js{4,5,19,20}
+```js{4,5,19,20}
 function useFriendStatus(friendID) {
   const [isOnline, setIsOnline] = useState(null);
 
@@ -168,11 +168,11 @@ function useWindowWidth() {
 
   return width;
 }
-​```
+```
 
 如果将这两个自定义 Hooks 用在同一个组件中会发生什么呢？
 
-​```js{2,3}
+```js{2,3}
 function ChatThread({ friendID, isTyping }) {
   const width = useWindowWidth();
   const isOnline = useFriendStatus(friendID);
@@ -183,7 +183,7 @@ function ChatThread({ friendID, isTyping }) {
     </ChatLayout>
   );
 }
-​```
+```
 
 什么时候才应该重新渲染？
 
@@ -201,7 +201,7 @@ function ChatThread({ friendID, isTyping }) {
 
 我们用同样的例子来解释：
 
-​```js
+```js
 function ChatThread({ friendID, isTyping }) {
   const width = useWindowWidth();
   const isOnline = useFriendStatus(friendID);
@@ -212,7 +212,7 @@ function ChatThread({ friendID, isTyping }) {
     </ChatLayout>
   );
 }
-​```
+```
 
 假设 `Typing...` 标签没有像我们预期的那样出现在屏幕上，尽管在该组件的 prop 上方很多层的数据正在发生变化。我们该如何正确的找到错误呢？
 
