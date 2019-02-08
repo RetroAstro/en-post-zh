@@ -1,9 +1,3 @@
----
-title: 为什么 X 不是 Hook ?
-date: '2019-01-26'
-spoiler: 我们可以这样做，但并不意味着我们应该这样做。
----
-
 自从 [React Hooks](https://reactjs.org/hooks) 第一个 alpha 版本发布以来，有一个问题不断出现在讨论中：“为什么其他的一些 API 不是 Hook ?“
 
 首先提醒一下，以下几个 API 才是真正的 Hooks：
@@ -61,7 +55,7 @@ function MyComponent() {
 
 Hooks 之所以有用是因为你可以在它们之间传递值。
 
-```js{4,12,14}
+```js
 function useWindowWidth() {
   const [width, setWidth] = useState(window.innerWidth);
   // ...
@@ -138,7 +132,7 @@ function Button({ color }) {
 
 假设我们尝试着将 `useBailout()` 放入两个自定义 Hooks：
 
-```js{4,5,19,20}
+```js
 function useFriendStatus(friendID) {
   const [isOnline, setIsOnline] = useState(null);
 
@@ -172,7 +166,7 @@ function useWindowWidth() {
 
 如果将这两个自定义 Hooks 用在同一个组件中会发生什么呢？
 
-```js{2,3}
+```js
 function ChatThread({ friendID, isTyping }) {
   const width = useWindowWidth();
   const isOnline = useFriendStatus(friendID);
