@@ -1,3 +1,6 @@
+> * 原文地址：https://overreacted.io/why-isnt-x-a-hook/
+> * 原文作者：[Dan Abramov](https://github.com/gaearon)
+
 自从 [React Hooks](https://reactjs.org/hooks) 第一个 alpha 版本发布以来，有一个问题不断出现在讨论中：“为什么其他的一些 API 不是 Hook ?“
 
 首先提醒一下，以下几个 API 才是真正的 Hooks：
