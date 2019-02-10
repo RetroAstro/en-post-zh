@@ -4,7 +4,7 @@
 
 大多数教程把 React 称作是一个 UI 库。这是有道理的，因为 React 就是一个 UI 库。正如官网上的标语所说的那样。
 
-![React homepage screenshot: "A JavaScript library for building user interfaces"](./react.png)
+![React homepage screenshot: "A JavaScript library for building user interfaces"](https://overreacted.io/static/0429fcb4a2f2022852afc698ff8968f1/74bd4/react.png)
 
 我曾经写过关于构建[用户界面](/the-elements-of-ui-engineering/)会遇到的难题一文。但是本篇文章将以一种不同的方式来讲述 React — 因为它更像是一种[编程运行时](https://en.wikipedia.org/wiki/Runtime_system)。
 
