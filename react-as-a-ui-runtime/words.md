@@ -116,11 +116,11 @@ individual expression :thought_balloon: 单个表达式
 
 raw models :thought_balloon: 原始模型
 
-crucial metric :thought_balloon: 关键指标​
+crucial metric :thought_balloon: 关键指标
 
 time to interactive :thought_balloon: 交互时间
 
-cliff :thought_balloon: n. 悬崖​
+cliff :thought_balloon: n. 悬崖
 
 stock tickers :thought_balloon: 股票代码
 
@@ -140,7 +140,7 @@ metaphor :thought_balloon: n. 隐喻，比喻
 
 cumbersome :thought_balloon: adj. 笨重的
 
-essentially :thought_balloon: adv. 实质上，本质上​
+essentially :thought_balloon: adv. 实质上，本质上
 
 observable :thought_balloon: adj. 可观察的
 
@@ -152,4 +152,3 @@ alternative :thought_balloon: n. 替代；adj. 选择性的
 
 multipass rendering :thought_balloon: 多道渲染
 
-​
