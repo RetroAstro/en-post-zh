@@ -4,12 +4,12 @@
 
 **日常博客篇**
 
-* [为什么 X 不是 Hook ?](./why-isnt-x-a-hook.md) :thought_balloon:
+* [为什么 X 不是 Hook ?](./why-isnt-x-a-hook.md)  :book:
 
-* [将 React 作为 UI 运行时](./react-as-a-ui-runtime.md) :thought_balloon:
+* [将 React 作为 UI 运行时](./react-as-a-ui-runtime.md)  :book:
 
 
-* [React Hooks：不是魔法，只是数组罢了](./react-hooks-not-magic-just-arrays.md) :thought_balloon:
+* [React Hooks：不是魔法，只是数组罢了](./react-hooks-not-magic-just-arrays.md)  :book:
 
 
 
