@@ -4,7 +4,7 @@ noncompositional :thought_balloon: adj. 不可组合的
 
 antimodular :thought_balloon: adj. 反模块化的
 
-dive :thought_balloon: v. 潜水，跳水；n. 潜入​
+dive :thought_balloon: v. 潜水，跳水；n. 潜入
 
 folk :thought_balloon: adj. 民间的；n. 人们
 
@@ -42,7 +42,7 @@ flaw :thought_balloon: n. 缺陷，漏洞；v. 爆裂
 
 vice versa :thought_balloon: 反之亦然
 
-semantic :thought_balloon: n. 语义​
+semantic :thought_balloon: n. 语义
 
 screwdriver :thought_balloon: n. 螺丝刀，起子
 
@@ -56,4 +56,3 @@ suspend :thought_balloon: v. 停止，中止
 
 suspense :thought_balloon: n. 悬念
 
-​
