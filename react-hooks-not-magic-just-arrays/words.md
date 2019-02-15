@@ -24,7 +24,7 @@ annotate :thought_balloon: v. 注释，批注
 
 execution context :thought_balloon: 执行上下文
 
-maintain :thought_balloon: v. 保持，维持，保存​
+maintain :thought_balloon: v. 保持，维持，保存
 
 scope :thought_balloon: n. 范围，规模，广度
 
@@ -44,7 +44,7 @@ inconsistent :thought_balloon: adj. 不一致的
 
 erroneous :thought_balloon: adj. 错误的
 
-manipulate :thought_balloon: ​v. 操控，摆弄
+manipulate :thought_balloon: v. 操控，摆弄
 
-lay out :thought_balloon: 布局，编排​
+lay out :thought_balloon: 布局，编排
 
