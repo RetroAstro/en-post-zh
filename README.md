@@ -6,7 +6,7 @@
 
 **日常博客篇**
 
-[:book:](./why-isnt-x-a-hook/words.md)  [为什么 X 不是 Hook ?](./why-isnt-x-a-hook/index.md)
+[:book:](./why-isnt-x-a-hook/words.md)  [为什么 X 不是 Hook ？](./why-isnt-x-a-hook/index.md)
 
 [:book:](./react-as-a-ui-runtime/words.md)  [将 React 作为 UI 运行时](./react-as-a-ui-runtime/index.md)
 
