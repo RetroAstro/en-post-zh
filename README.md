@@ -12,7 +12,7 @@
 
 [:book:](./react-hooks-not-magic-just-arrays/words.md)  [React Hooks：不是魔法，只是数组罢了](./react-hooks-not-magic-just-arrays/index.md)
 
-:book:  为什么 React Suspense 将会逆转 Web 应用开发的游戏规则？
+:book:  为什么 React Suspense 将会逆转 Web 应用开发的游戏规则 ？
 
 **JavaScript 工作原理篇** 
 
