@@ -18,5 +18,17 @@ Suspense 不仅在数据加载时有用，它甚至可以被应用到任何异�
 
 Suspense 的设计思想是让组件具有“暂停”渲染的能力，例如，组件需要从外部资源中加载额外数据时。等到数据都加载完成，React 才会尝试重新渲染组件。
 
-React 使用 Promise 来实现该功能。组件能在 render 方法调用时抛出 Promise（或者任何在组件渲染时调用的方法，例如，新的静态方法 `getDerivedStateFromProps` ）。React 会捕获 Promise 并沿着组件树往上寻找最近的 `Suspense` 组件，并且它会充当为一种边界。`Suspense` 组件接收一个名为 `fallback` 的 prop，只要它的子树中有任何组件处于暂停状态，`fallback` 中的组件就会立即被渲染。
+React 使用 Promise 来实现该功能。组件能在 render 方法调用时抛出 Promise（或者任何在组件渲染时调用的方法，例如，新的静态方法 `getDerivedStateFromProps` ）。React 会捕获 Promise 并沿着组件树往上寻找最近的 `Suspense` 组件，并且它会充当一种边界。`Suspense` 组件接收一个名为 `fallback` 的 prop，只要它的子树中有任何组件处于暂停状态，`fallback` 中的组件就会立即被渲染。
+
+React 还会跟踪抛出的 Promise 。组件中的 Promise 一旦 resolve ，React 就会尝试去继续渲染该组件。因为我们假定由于 Promise 已经被 resolve ，这也就意味着暂停的组件已经具有正确渲染所需的全部数据。为此，我们使用某种形式的缓存来存储数据。该缓存取决于每次渲染时数据是否可用（如果可用就会像从变量中取值一样读取它），若数据没有准备好，则会触发 fetch 然后抛出 Promise 以便 React 捕获。如上所述，这并不是数据加载所独有的，任何可以使用 Promise 来描述的异步操作都可以充分利用 Suspense ，显然代码分割是一个非常明显且流行的例子。
+
+Suspense 的核心概念与[错误边界](https://reactjs.org/docs/error-boundaries.html)非常相似。而错误边界在 React 16 中被介绍为能够在应用的任何地方捕捉未捕获的异常，同样的它通过在树中放置组件（在这种情况下为任何带有 componentDidCatch 生命周期方法的组件）来处理从该组件下面抛出的所有异常。无独有偶，`Suspense` 组件捕获任何由子组件抛出的 Promise ，不同的是我们并不需要一个特定的组件来充当边界，因为 `Suspense` 组件自己就是，它可以让我们定义 `fallback` 来决定后备的渲染组件。
+
+![1](./assets/1.gif)
+
+这样的功能显著地简化了我们对应用中加载状态的思考方式并且让我们作为开发者的心智模型与 UX 和 UI 设计师更加一致。
+
+设计师通常并不会考虑数据源，而是更多的考虑用户界面或应用程序的逻辑组织和信息层次结构。你知道还有谁不在意数据源吗？答案是用户。没有人会喜欢成千上万个加载时的 spinner ，并且其中的一些只会闪烁几毫秒，当数据加载完成时，页面内容将会上下跳动。
+
+## 为什么 Suspense 被称作是巨大的突破呢？
 
