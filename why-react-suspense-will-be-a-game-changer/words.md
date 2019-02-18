@@ -10,21 +10,21 @@ conference talk :thought_balloon: 会议谈话
 
 is pitched as :thought_balloon: 被称作
 
-functionality :thought_balloon: n. 功能​
+functionality :thought_balloon: n. 功能
 
 boundary :thought_balloon: n. 边界，界限
 
 exclusive :thought_balloon: adj. 独家的；adv. 只，仅仅
 
-uncaught exception :thought_balloon: 未捕获的异常​
+uncaught exception :thought_balloon: 未捕获的异常
 
 dramatically :thought_balloon: adv. 显著地
 
-verbose :thought_balloon: adj. 详细的，啰嗦的​，冗余的
+verbose :thought_balloon: adj. 详细的，啰嗦的，冗余的
 
 scatter :thought_balloon: v. 分散；n. 离散
 
-ternary operator :thought_balloon: 三元​运算符
+ternary operator :thought_balloon: 三元运算符
 
 per se :thought_balloon: 本身
 
@@ -40,9 +40,9 @@ perceive :thought_balloon: v. 感知，察觉
 
 hoist :thought_balloon: v. 提升，升起；n. 起重机
 
-readability :thought_balloon: n. 可读性​
+readability :thought_balloon: n. 可读性
 
-maintainability :thought_balloon: n. 可维护性​
+maintainability :thought_balloon: n. 可维护性
 
 utilise :thought_balloon: v. 利用，应用
 
@@ -62,6 +62,5 @@ coupled :thought_balloon: v. 耦合
 
 decoupled :thought_balloon: v. 解耦
 
-massive :thought_balloon: adj. 大规模的，魁伟的​
+massive :thought_balloon: adj. 大规模的，魁伟的
 
-​
