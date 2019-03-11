@@ -189,3 +189,126 @@ function updateHostComponent(current, workInProgress, renderExpirationTime) {...
 
 ### Effects 列表
 
+React 能够非常快速地进行渲染更新，为了达到这样的高性能水平，它采用了一些有趣的技术。**其中之一就是用线性表构建带有 effects 的 fiber 节点，这样就拥有了快速迭代的效果。** 迭代线性表远比迭代树要来的快，我们没有必要在不含副作用的节点上浪费时间。
+
+该列表的目标是标记具有 DOM 更新或者与 effects 相关的节点。该列表是 **`finishedWork`** 树的子集，使用 **`nextEffects`** 属性而不是 **`current`** 和 **`workInProgress`** 树中的 **`child`** 属性进行连接。
+
+[Dan Abramov](https://medium.com/@dan_abramov) 为 effects 列表给出了一个类比。他喜欢将其比作圣诞树，所有的 effects 节点都会被 “圣诞灯” 绑定在一起。为了将其可视化，让我们想象一下在含有 fiber 节点的树中，那些高亮着的节点就代表着需要被完成的工作。例如，我们的更新导致 **`c2`** 被插入 DOM 中，**`d2`** 和 **`c1`** 会改变其自身的属性，而 **`b2`** 则要调用某个生命周期方法。effects 列表会将它们连接起来，便于 React 在之后直接跳过其他节点：
+
+![linear](./assets/linear.png)
+
+现在你应该明白具有 effects 的节点是如何连接在一起的了。当我们遍历节点时，React 用 **`firstEffect`** 指针来找到列表的开头。因此上图也可以表示为这样的线性表：
+
+![list](./assets/list.png)
+
+如你所见，React 会按照从子代到双亲的顺序依次调用 effects。
+
+### Fiber 树的头节点
+
+每一个 React 应用都会有一个或者多个 DOM 元素作为容器。在本例中指的是 ID 为 **`container`** 的 **`div`** 元素。
+
+```js
+const domContainer = document.querySelector('#container')
+ReactDOM.render(React.createElement(ClickCounter), domContainer)
+```
+
+React 会为每一个作为容器的元素创建一个 [fiber root](https://github.com/facebook/react/blob/0dc0ddc1ef5f90fe48b58f1a1ba753757961fc74/packages/react-reconciler/src/ReactFiberRoot.js#L31) 对象，你可以通过对 DOM 元素的引用来访问它。
+
+```js
+const fiberRoot = query('#container')._reactRootContainer._internalRoot
+```
+
+fiber root 保留着对 fiber 树的引用。它被储存在 fiber root 的 **`current`** 属性上： 
+
+```js
+const hostRootFiberNode = fiberRoot.current
+```
+
+fiber 树的头节点是一种[特殊类型](https://github.com/facebook/react/blob/cbbc2b6c4d0d8519145560bd8183ecde55168b12/packages/shared/ReactWorkTags.js#L34)的 fiber 节点，它被称作 **`HostRoot`** 。它在内部被创建，并充当了最顶层组件的父级。**`HostRoot`** fiber 节点上有一个 **`stateNode`** 属性用于返回到 **`FiberRoot`** ：
+
+```js
+fiberRoot.current.stateNode === fiberRoot; // true
+```
+
+你可以通过 fiber root 来访问最顶层的 **`HostRoot`** fiber 节点，然后再进一步地深入 fiber 树。或者你也可以直接从组件实例上获取独立的 fiber 节点就像下面这样：
+
+```js
+compInstance._reactInternalFiber
+```
+
+### Fiber 节点的结构
+
+让我们来看下为 **`ClickCounter`** 组件创建的 fiber 节点的结构：
+
+```js
+{
+    stateNode: new ClickCounter,
+    type: ClickCounter,
+    alternate: null,
+    key: null,
+    updateQueue: null,
+    memoizedState: {count: 0},
+    pendingProps: {},
+    memoizedProps: {},
+    tag: 1,
+    effectTag: 0,
+    nextEffect: null
+}
+```
+
+这是 **`span`** DOM 元素的 fiber 结构：
+
+```js
+{
+    stateNode: new HTMLSpanElement,
+    type: "span",
+    alternate: null,
+    key: "2",
+    updateQueue: null,
+    memoizedState: null,
+    pendingProps: {children: 0},
+    memoizedProps: {children: 0},
+    tag: 5,
+    effectTag: 0,
+    nextEffect: null
+}
+```
+
+fiber 节点上有很多的字段。在之前我已经介绍过 **`alternate`** 、**`effectTag`** 和 **`nextEffect`** 字段的作用。下面让我们开始理解为什么还需要其他的字段吧。
+
+#### stateNode
+
+持有对组件的类实例、DOM 节点或者其他与 fiber 节点相关的 React 元素类型。一般来讲，我们可以说这个属性是用来保存与 fiber 相关的局部状态。
+
+#### type
+
+定义 fiber 是函数还是类。对于 class 组件来讲，它指向 constructor 函数而对于 DOM 元素来讲它用来描述一个 HTML 标签。我经常用这个字段来理解 fiber 节点到底与哪个 React 元素相关联。
+
+#### tag
+
+定义 [fiber 的类型](https://github.com/facebook/react/blob/769b1f270e1251d9dbdce0fcbd9e92e502d059b8/packages/shared/ReactWorkTags.js)。它在协调算法中用于确定那些需要完成的 work 。就像之前提到过的，这些 work 会因为 React 元素类型的不同而不同。[createFiberFromTypeAndProps](https://github.com/facebook/react/blob/769b1f270e1251d9dbdce0fcbd9e92e502d059b8/packages/react-reconciler/src/ReactFiber.js#L414) 函数会将 React 元素映射到相应的 fiber 节点类型上。在我们的应用中，**`ClickCounter`** 组件的 **`tag`** 是 **`1`** 代表着 **`ClassComponent`** ，而 **`span`** 元素为 **`5`** 代表着 **`HostComponent`** 。
+
+#### updateQueue
+
+用于 state 更新、回调和 DOM 更新的队列。
+
+#### memoizedState
+
+用来创建输出的 fiber 节点上的 state 。在处理更新时，它反映着将会在当前屏幕上渲染的 state 。
+
+#### memoizedProps
+
+在前一次渲染过程中用来创建输出的 fiber 节点上的 props 。
+
+#### pendingProps
+
+从 React 元素的新数据中更新的 props ，等待着在其子组件和 DOM 元素中被使用。
+
+#### key
+
+一组子代中的唯一标识符，能够帮助 React 确定列表中哪些节点发生了改变、增加或删除。
+
+你可以在[这里](https://github.com/facebook/react/blob/6e4f7c788603dac7fccd227a4852c110b072fe16/packages/react-reconciler/src/ReactFiber.js#L78)找到完整的 fiber 节点结构。我在上面的解释中省略了一些字段。特别的，我跳过了 **`child`** 、**`sibling`** 和 **`return`** 这些指针，它们构成了[上篇文章](https://medium.com/react-in-depth/the-how-and-why-on-reacts-usage-of-linked-list-in-fiber-67f1014d0eb7)中我所描述的一种树数据结构。还有像 **`expirationTime`** 、**`childExpirationTime`** 和 **`mode`** 这些与 **`Scheduler`** 特定类别相关的字段。
+
+## 常规算法
+
