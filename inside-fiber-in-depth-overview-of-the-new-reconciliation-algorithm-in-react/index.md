@@ -310,5 +310,68 @@ fiber 节点上有很多的字段。在之前我已经介绍过 **`alternate`** 
 
 你可以在[这里](https://github.com/facebook/react/blob/6e4f7c788603dac7fccd227a4852c110b072fe16/packages/react-reconciler/src/ReactFiber.js#L78)找到完整的 fiber 节点结构。我在上面的解释中省略了一些字段。特别的，我跳过了 **`child`** 、**`sibling`** 和 **`return`** 这些指针，它们构成了[上篇文章](https://medium.com/react-in-depth/the-how-and-why-on-reacts-usage-of-linked-list-in-fiber-67f1014d0eb7)中我所描述的一种树数据结构。还有像 **`expirationTime`** 、**`childExpirationTime`** 和 **`mode`** 这些与 **`Scheduler`** 特定类别相关的字段。
 
-## 常规算法
+## 通用算法
+
+React 主要在两个阶段执行相应的 work ：**render** 阶段和 **commit** 阶段。
+
+在第一次 **render** 阶段执行期间，React 会将更新应用于那些通过 **`setState`** 或者 **`React.render`** 调度的组件，并且判断出需要在 UI 中更新的内容。如果是初次渲染，React 会为从 **`render`** 方法中返回的每一个元素创建一个新的 fiber 节点。在后续的更新中，已有的 React 元素对应的 fiber 节点会被重用和更新。**这个阶段最终的执行结果就是生成一棵带有副作用的 fiber 节点树。** 这些 effects 描述了在 **`commit`** 阶段将会被执行的 work 。在 **`commit`** 阶段，React 会将带有副作用的 fiber 节点树作用到实例上。它会遍历整个 effects 列表然后执行像 DOM 更新和其他对用户可见的操作。
+
+**理解在 `render` 阶段执行的工作可以是异步的十分重要。** React 能够根据可用时间同时处理一个或者多个 fiber 节点，如果发现本轮的可用时间耗尽，React 就会先停止下来把那些已经完成的 work 存好然后暂停某些事件。当又有可用时间的时候才会从原先停止的地方继续。虽然在有些时候 React 不得不丢弃已经完成的 work 然后再从头开始。我们之所以在 **`render`** 阶段能够暂停那些正在执行的 work 是因为这些 work 并不会造成用户可见的改变，例如 DOM 的更新。**相反，接下来的 `commit` 阶段总是同步执行的。** 因为在这个阶段的操作会直接造成对用户可见的改变，比如说 DOM 的更新。这也正是 React 需要一次就完成它们的原因。
+
+调用生命周期方法是 React 执行 work 的类型之一。有些方法在 **`render`** 阶段被调用，而另外一些方法则会在 **`commit`** 阶段被调用。下面是在 **`render`** 阶段会被调用的生命周期方法列表：
+
+- [UNSAFE_] componentWillMount (弃用)
+- [UNSAFE_] componentWillReceiveProps (弃用)
+- getDerivedStateFromProps
+- shouldComponentUpdate
+- [UNSAFE_] componentWillUpdate (弃用)
+- render 
+
+如你所见，在 **`render`** 阶段执行的一些遗留的生命周期方法从 React 16.3 版本开始就已经被标记为 **`UNSAFE`** 。这些遗留的生命周期方法将会在 React 16.x 版本中被弃用，而与之同名但没有被标记的生命周期方法将会在 17.0 版本中被移除。
+
+你会对 React 团队做出这样的改变而感到好奇吗？
+
+好吧，我们刚刚才了解到在 **`render`** 阶段并不会进行像 DOM 更新那样的副作用操作，因此 React 就有了处理异步更新与异步组件的能力（甚至能够以多线程的方式进行此操作）。然而，那些标有 **`UNSAFE`** 的生命周期方法经常会被误解和误用。开发者会把带有副作用的代码放入这些生命周期方法中，而在新的异步渲染机制里这样做可能会出现问题。虽然那些同名但没有被标记为 **`UNSAFE`** 的生命周期方法将会在未来被移除，但在即将来临的并发模式下的 React 中使用这些 **`UNSAFE`** 标记的生命周期方法仍会有很大几率出现 bug 。
+
+下面是在 **`commit`** 阶段会执行的生命周期方法列表：
+
+- getSnapshotBeforeUpdate
+- componentDidMount
+- componentDidUpdate
+- componentWillUnmount
+
+因为这些方法在同步的 **`commit`** 阶段被执行，因而它们中可能带有副作用并且也可能进行 DOM 的操作。
+
+好了，现在我们拥有了必要的前置知识，这足以让我们深入用于遍历树和执行 work 的通用算法。让我们开始吧。
+
+### Render 阶段
+
+协调算法总是使用 [renderRoot](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactFiberScheduler.js#L1132) 函数从最顶层的 **`HostRoot`** fiber 节点开始。但是，React 会跳过那些已经处理过的 fiber 节点直到发现带有未完成的 work 的 fiber 节点。例如，如果你在组件树的深处调用 **`setState`** ，React 会从最顶层开始但它会很快地跳过那些父组件直到发现调用 **`setState`** 方法的组件。
+
+#### work loop 的主要步骤
+
+所有的 fiber 节点都会在 [work loop](https://github.com/facebook/react/blob/f765f022534958bcf49120bf23bc1aa665e8f651/packages/react-reconciler/src/ReactFiberScheduler.js#L1136) 中被处理。下面是该 loop 中同步执行部分的实现代码：
+
+```js
+function workLoop(isYieldy) {
+  if (!isYieldy) {
+    while (nextUnitOfWork !== null) {
+      nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+    }
+  } else {...}
+}
+```
+
+在上面的代码中，**`nextUnitOfWork`** 持有来自 **`workInProgress`** 树中那些带有 work 且需要被执行的 fiber 节点的引用。当 React 遍历整个 Fiber 树时，通过这个变量就能够清楚地知道哪些 fiber 节点上含有未完成的 work 。在当前的 fiber 被处理完之后，这个变量要么会持有下一个树中的 fiber 节点的引用要么就为 **`null`** 。在这种情况下 React 便会退出 work loop 然后随时准备着 commit 已有的改变。
+
+在这里我们有四种主要的函数用于遍历树以及开始或结束某个 work ：
+
+- [performUnitOfWork](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactFiberScheduler.js#L1056)
+- [beginWork](https://github.com/facebook/react/blob/cbbc2b6c4d0d8519145560bd8183ecde55168b12/packages/react-reconciler/src/ReactFiberBeginWork.js#L1489)
+- [completeUnitOfWork](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactFiberScheduler.js#L879)
+- [completeWork](https://github.com/facebook/react/blob/cbbc2b6c4d0d8519145560bd8183ecde55168b12/packages/react-reconciler/src/ReactFiberCompleteWork.js#L532)
+
+为了展示它们是如何被使用的，请看下面用来遍历一棵 fiber 树的动画。为了展示这个例子我给出了这些函数的简单实现。每个函数都需要处理相应的 fiber 节点，当 React 往下遍历时，你可以看到当前活动的 fiber 节点发生了改变。你可以在下面我给出的视频链接中清晰地看出这个算法在遍历树时是如何从一个分支切换到另一个分支上去的。它首先会完成子 fiber 节点中带有的 work ，然后才会移动到父 fiber 节点上。
+
+![works](./assets/works.gif)
 
