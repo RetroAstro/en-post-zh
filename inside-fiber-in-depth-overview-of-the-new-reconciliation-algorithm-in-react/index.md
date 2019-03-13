@@ -375,3 +375,99 @@ function workLoop(isYieldy) {
 
 ![works](./assets/works.gif)
 
+> ***请注意由直线垂直连接的 fiber 节点属于兄弟节点，而以弯曲方式连接的节点才是父子节点的关系，例如 `b1` 没有子节点，而 `b2` 却有一个叫做 `c1` 的子节点。***
+
+[这是视频的链接](https://vimeo.com/302222454)，你可以随时暂停播放并检查当前的节点与函数执行的状态。从概念上来讲，你可以将 “begin” 看作刚进入组件并开始相应的 work ，而 “compete” 则代表着 work 执行完毕可以退出组件。你也可以先看看我[给出的实现代码和相应的例子](https://stackblitz.com/edit/js-ntqfil?file=index.js)，因为马上我将会解释这些函数的作用。
+
+让我们先从最开始的 **`performUnitOfWork`** 和 **`beginWork`** 函数开始：
+
+```js
+function performUnitOfWork(workInProgress) {
+    let next = beginWork(workInProgress);
+    if (next === null) {
+        next = completeUnitOfWork(workInProgress);
+    }
+    return next;
+}
+
+function beginWork(workInProgress) {
+    console.log('work performed for ' + workInProgress.name);
+    return workInProgress.child;
+}
+```
+
+**`performUnitOfWork`** 函数接收来自 **`workInProgress`** 树中的 fiber 节点，然后用 **`beginWork`** 函数开始 work 的执行。这个函数会开始当前 fiber 中所有需要被执行的活动。出于展示的目的，我们只是简单地打印了当前 fiber 的名字来表示已经完成的 work 。**`beginWork` 函数总是会返回在 loop 中需要被处理的下一个子 fiber 节点或者是 `null` 。** 
+
+如果有下一个子节点，那么它将在 **`workLoop`** 函数中被赋值给 **`nextUnitOfWork`** 变量。然而，要是没有下一个子节点，React 就会察觉到此时到达了分支的底部因此便可以结束当前节点的 work 。**一旦当前节点的 work 结束，React 便会开始执行它的兄弟节点上的 work，然后再返回到父节点上。** 下面的代码是在 **`completeUnitOfWork`** 函数中完成的：
+
+```js
+function completeUnitOfWork(workInProgress) {
+    while (true) {
+        let returnFiber = workInProgress.return;
+        let siblingFiber = workInProgress.sibling;
+
+        nextUnitOfWork = completeWork(workInProgress);
+
+        if (siblingFiber !== null) {
+            // If there is a sibling, return it
+            // to perform work for this sibling
+            return siblingFiber;
+        } else if (returnFiber !== null) {
+            // If there's no more work in this returnFiber,
+            // continue the loop to complete the parent.
+            workInProgress = returnFiber;
+            continue;
+        } else {
+            // We've reached the root.
+            return null;
+        }
+    }
+}
+
+function completeWork(workInProgress) {
+    console.log('work completed for ' + workInProgress.name);
+    return null;
+}
+```
+
+你可以看到这个函数由很大的 **`while`** 循环构成。当 **`workInProgress`** 树中的节点没有子节点的时候，React 便会执行上面这个函数。在结束当前的 fiber 节点后，便会检查该节点是否含有兄弟节点。如果有兄弟节点，React 便会提前跳出循环并返回该兄弟节点。返回的这个节点将会被赋值给 **`nextUnitOfWork`** 变量，然后 React 便会从这个兄弟节点开始的分支往下继续执行相应的 work 。理解 React 只会先完成前面兄弟节点的 work 十分重要，它并不会提前结束父节点的 work 。**只有在完成以子节点开始的所有分支上的 work 之后，React 才会结束父节点上的 work 然后再进行回溯的工作。** 
+
+从上面的实现代码可以看出，**`performUnitOfWork`** 与 **`completeUnitOfWork`** 函数主要用于迭代。而真正的活动发生在 **`beginWork`** 和 **`completeWork`** 函数中。在本系列剩下的文章中我们会了解到当 React 执行 **`beginWork`** 与 **`completeWork`** 时我们的 **`ClickCounter`** 组件和 **`span`** 节点具体发生了什么。
+
+###  Commit 阶段
+
+这个阶段以调用 [completeRoot](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactFiberScheduler.js#L2306) 函数作为开始。在这个阶段 React 会执行更新 DOM 的操作以及调用可引起突变的 pre 与 post 钩子生命周期方法。
+
+在 React 进入这个阶段时，它拥有着两棵树和 effects 列表。第一棵树代表着此刻在屏幕上渲染的状态。而另一棵则是在 **`render`** 阶段生成的备用树。在源码中它通常被叫做 **`finishedWork`** 或者 **`workInProgress`** 树。该备用树与当前树一样，通过 **`child`** 与 **`sibling`** 指针连接。
+
+接下来，我们还有一个 effects 列表  — 来自 **`finishedWork`** 树且通过 **`nextEffect`** 指针连接的一组节点子集。需要记住的是 effects 列表是执行完 **`render`** 阶段后的结果。渲染的最终目的是要确定哪些 DOM 节点应该被插入、更新或者删除，哪些组件上的生命周期方法需要被调用。这便是 effects 列表要告诉我们的东西，**同时它们也是在 commit 阶段将会被迭代的节点集。** 
+
+> ***出于方便调试的目的，我们可以通过 fiber root 上的 `current` 属性拿到  `current` 树。同时我们也能通过在 `current` 树中 `HostFiber` 上的 `alternate` 属性拿到 `finishedWork` 树。***
+
+在 commit 阶段主要运行的函数是 [commitRoot](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactFiberScheduler.js#L523) 。
+
+它大致会执行以下的工作：
+
+* 在标有 **`Snapshot`** effect 的节点上调用 **`getSnapshotBeforeUpdate`** 生命周期方法。
+* 在标有 **`Deletion`** effect 的节点上调用 **`componentWillUnmount`** 生命周期方法。
+* 执行 DOM 的插入、更新和删除操作。
+* 将 **`finishedWork`** 树标记为 **`current`** 树。
+* 在标有 **`Placement`** effect 的节点上调用 **`componentDidUpdate`** 生命周期方法。
+
+在调用突变前的 **`getSnapshotBeforeUpdate`** 生命周期方法后，React 会提交树中产生的所有副作用。它将通过两轮进行，第一轮会执行所有 DOM (host) 的插入、更新、删除以及 ref 的卸载。之后 React 会把 **`finishedWork`** 树交给 **`FiberRoot`** 并将 **`workInProgress`** 树标记为 **`current`** 树。这是在 commit 阶段的第一轮之后要完成的工作，这样在调用 **`componentWillUnmount`** 生命周期方法时引用的仍然是先前的那棵 **`current`** 树，但在 commit 阶段的第二轮开始之前，**`finishedWork`** 树已经被标记为 **`current`** 树，因此在调用 **`componentDidMount/Update`** 生命周期方法时引用的就是最新的 **`current`** 树。在第二轮进行的时候，React 会调用所有其他的生命周期方法以及 ref 相关的回调。这些生命周期方法被放在单独的一轮中进行为的就是确保在这之前树中所有的插入、更新和删除操作都已经执行完毕。
+
+下面是上述步骤中函数运行的重点：
+
+```js
+function commitRoot(root, finishedWork) {
+    commitBeforeMutationLifecycles()
+    commitAllHostEffects();
+    root.current = finishedWork;
+    commitAllLifeCycles();
+}
+```
+
+代码中的每一个子函数都实现了用于遍历 effects 列表并查看相应 effects 类型的方法，当发现与该函数目的相关的 effect 时，React 便会立刻调用它。
+
+#### 突变前的生命周期方法
+
