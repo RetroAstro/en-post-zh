@@ -50,7 +50,7 @@ redundant :thought_balloon: adj. 冗余的
 
 eliminate :thought_balloon: v. 消除，清除
 
-explicitly :thought_balloon: adj. 明确的
+explicitly :thought_balloon: adv. 明确地
 
 individual :thought_balloon: adj. 个人的，单独的；n. 个人，个体
 
