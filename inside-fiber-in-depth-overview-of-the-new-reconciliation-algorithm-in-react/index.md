@@ -471,3 +471,54 @@ function commitRoot(root, finishedWork) {
 
 #### 突变前的生命周期方法
 
+例如，下面的代码会遍历整个 effects 树并检查某个带有 **`Snapshot`** effect 的节点：
+
+```js
+function commitBeforeMutationLifecycles() {
+    while (nextEffect !== null) {
+        const effectTag = nextEffect.effectTag;
+        if (effectTag & Snapshot) {
+            const current = nextEffect.alternate;
+            commitBeforeMutationLifeCycles(current, nextEffect);
+        }
+        nextEffect = nextEffect.nextEffect;
+    }
+}
+```
+
+对于 class 组件来讲，这里的 effect 就代表着调用 **`getSnapshotBeforeUpdate`** 生命周期方法。
+
+#### DOM 的更新
+
+[commitAllHostEffects](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactFiberScheduler.js#L376) 函数是 React 执行 DOM 更新的地方。该函数基本上定义了需要为节点完成和执行的操作类型：
+
+```js
+function commitAllHostEffects() {
+    switch (primaryEffectTag) {
+        case Placement: {
+            commitPlacement(nextEffect);
+            ...
+        }
+        case PlacementAndUpdate: {
+            commitPlacement(nextEffect);
+            commitWork(current, nextEffect);
+            ...
+        }
+        case Update: {
+            commitWork(current, nextEffect);
+            ...
+        }
+        case Deletion: {
+            commitDeletion(nextEffect);
+            ...
+        }
+    }
+}
+```
+
+有趣的是，React 把调用 **`componentWillUnmount`** 的生命周期方法作为了 **`commitDeletion`** 函数中处理删除操作的一部分来进行。
+
+#### 突变后的生命周期方法
+
+[commitAllLifecycles](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactFiberScheduler.js#L465) 函数则是 React 调用剩下的像 **`componentDidUpdate`** 和 **`componentDidMount`** 等生命周期方法的地方。
+
