@@ -16,6 +16,8 @@
 
 [:book:](./inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react/words.md)  [解析 Fiber : 深入理解 React 中的新协调算法](./inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react/index.md)
 
+:book:  React 是怎样和为什么要在 Fiber 中使用链表
+
 **JavaScript 工作原理篇** 
 
 
