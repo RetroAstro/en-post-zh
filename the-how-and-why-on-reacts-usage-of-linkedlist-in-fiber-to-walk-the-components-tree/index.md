@@ -22,7 +22,7 @@ Fiber 架构主要分为两个阶段：协调 / 渲染阶段与提交阶段。�
 
 > 在处理 UI 问题时，如果一次**执行太多的工作**，将会导致屏幕上的动画掉帧。
 
-那么该如何理解这里的“一次执行所有工作”呢。好吧，基本上，如果 React 同步地去遍历整个组件树然后再依次执行相应组件的 work ，应用中逻辑代码的执行时间可能就会超过有效的 16 ms 。而这将会导致掉帧以及视图不一致的结果。
+那么该如何理解这里的“一次执行所有工作”呢。好吧，基本上，如果 React 同步地去遍历整个组件树然后再依次执行相应组件的 work ，应用中逻辑代码的执行时间可能就会超过有效的 16 ms 。而这正是造成掉帧和视图不一致的罪魁祸首。
 
 那么有解决的办法吗？
 
@@ -38,7 +38,7 @@ requestIdleCallback((deadline)=>{
 
 如果我把上面的代码放到浏览器的控制台中执行，Chrome 会输出 `49.9 false` 。这基本上代表着我还有 `49.9ms` 来完成我需要做的任何工作，并且我没有用完所有分配的时间，直到 `deadline.didTimeout` 变为 `true` 。需要注意的是 `timeRemaining` 会随着浏览器处理工作的频率而改变，因此需要不断地被检查。
 
-> 事实上 **`requestIdleCallback`** 函数在有些时候会显得过于苛刻，并且经常会因为执行次数不够而导致 UI 渲染不流畅，为此 React 团队不得不重新[实现他们自己的版本](https://github.com/facebook/react/blob/eeb817785c771362416fd87ea7d2a1a32dde9842/packages/scheduler/src/Scheduler.js#L212-L222)。
+> 事实上 **`requestIdleCallback`** 函数在有些时候会显得过于苛刻，并且经常会因为执行次数不够而导致 UI 渲染的不流畅，为此 React 团队不得不重新[实现他们自己的版本](https://github.com/facebook/react/blob/eeb817785c771362416fd87ea7d2a1a32dde9842/packages/scheduler/src/Scheduler.js#L212-L222)。
 
 如果我们把 React 在组件中执行的所有活动放到 `performWork` 中去，然后使用 `requestIdleCallback` 函数去调度相应的 work ，我们的代码可能会像下面这样：
 
