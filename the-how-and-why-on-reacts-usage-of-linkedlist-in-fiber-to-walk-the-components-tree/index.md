@@ -51,3 +51,53 @@ requestIdleCallback((deadline) => {
 })
 ```
 
+我们在一个组件上执行其相应的 work 然后返回下一个需要被处理的组件的引用。同步地处理整个组件树是不合理的，就像 React [先前实现的协调算法](https://reactjs.org/docs/codebase-overview.html#stack-reconciler)一样。Andrew 也提到了这个问题：
+
+> *为了使用这些 API ，你需要一种方法将渲染时的 work 拆分为增量单位。*
+
+为了解决这个问题，React 团队不得不重新实现遍历组件树的算法，将其**从依赖于内置栈的同步递归模型转换为基于链表和指针的异步模型**。而这正是 Andrew 在下面所写到的：
+
+> *如果依赖于内置的调用栈，React 将会持续地工作直到栈被清空…… 如果我们可以随时中断调用栈并且还能手动操作调用帧，那不是很好吗？而这正是 React Fiber 想要达到的目标。**Fiber 是对先前基于栈的协调算法的重新实现，且专门用于 React 组件。** 你可以把单个 fiber 想象成一个虚拟的栈帧。* 
+
+这就是我马上将要解释的内容。
+
+### 关于栈的解释
+
+我假设读者对栈的概念都很熟悉。如果你的代码在断点处停止，那么在浏览器的 debugging 工具上显示的就会是一个类似栈的东西。以下是[维基百科](https://en.wikipedia.org/wiki/Call_stack?fbclid=IwAR06VWEQnwoEawg0NsoR8loBJwIbmPWsXXKqbAuOFBjkawHThK7zlIBsJ_U#Structure)上的一些相关引用和图表：
+
+> *在计算机科学中，**调用栈**是一种栈的数据结构，它储存着有关计算机活动子程序的信息。使用调用栈的主要原因是为了跟踪每个活动子程序在执行完成时应该返还控制的点。**调用栈**由许多个**栈帧**组合而成，每个栈帧对应着一个暂未以 **return** 语句终止的子程序调用。例如，如果一个名为 `DrawLine` 的子程序正在执行，并且它是被叫做 `DrawSquare` 的子程序调用的，那么在调用栈顶部的内容可能就会像下面所展示的图片一样。*
+
+![](./assets/call-stack.png)
+
+### 为什么栈会与 React 相关？
+
+正如我们在本文第一部分所定义的，React 会在协调 / 渲染阶段遍历整个组件树并且会为组件执行相应的工作。先前的协调算法使用的是依赖于内置栈的同步递归模型来遍历整个树。关于协调[官方文档](https://reactjs.org/docs/reconciliation.html#recursing-on-children)讲述了整个过程并且谈论了许多关于递归的内容：
+
+> *默认情况下，当对 DOM 节点的子节点进行递归时，React 会同时迭代子节点的列表，并且在产生差异时生成突变。* 
+
+你可以这样想，每次的递归调用都会向栈中增加一个帧，并且这个过程是同步的。假设我们有以下的组件树：
+
+![](./assets/components-tree.png)
+
+我们用 `render` 函数代表对象。你可以将它们视为组件的实例：
+
+```js
+const a1 = {name: 'a1'};
+const b1 = {name: 'b1'};
+const b2 = {name: 'b2'};
+const b3 = {name: 'b3'};
+const c1 = {name: 'c1'};
+const c2 = {name: 'c2'};
+const d1 = {name: 'd1'};
+const d2 = {name: 'd2'};
+
+a1.render = () => [b1, b2, b3];
+b1.render = () => [];
+b2.render = () => [c1];
+b3.render = () => [c2];
+c1.render = () => [d1, d2];
+c2.render = () => [];
+d1.render = () => [];
+d2.render = () => [];
+```
+
