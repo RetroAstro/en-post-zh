@@ -14,7 +14,7 @@
 
 [:book:](./why-react-suspense-will-be-a-game-changer/words.md)  [为什么 React Suspense 将会逆转 Web 应用开发的游戏规则 ？](./why-react-suspense-will-be-a-game-changer/index.md)
 
-[:book:](./inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react/words.md)  [解析 Fiber : 深入理解 React 中的新协调算法](./inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react/index.md)
+[:book:](./the-how-and-why-on-reacts-usage-of-linkedlist-in-fiber-to-walk-the-components-tree/words.md)  [React 是怎样和为什么要在 Fiber 中使用链表](./the-how-and-why-on-reacts-usage-of-linkedlist-in-fiber-to-walk-the-components-tree/index.md)
 
-:book:  [React 是怎样和为什么要在 Fiber 中使用链表](./the-how-and-why-on-reacts-usage-of-linkedlist-in-fiber-to-walk-the-components-tree/index.md)
+[:book:](./inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react/words.md)  [解析 Fiber : 深入理解 React 中的新协调算法](./inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react/index.md)
 
