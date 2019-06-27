@@ -99,7 +99,7 @@ class ClickCounter extends React.Component {
 
 如你所见，在 **`updateQueue.firstUpdate.next.payload`** 里的函数是我们在 **`ClickCounter`** 组件中为 **`setState`** 方法传入的回调。它代表着第一次更新时需要在 **`render`** 阶段调用的函数。
 
-## 处理 ClickCounter Fiber 节点中的更新
+## 处理 ClickCounter Fiber 节点的更新
 
 在先前的文章中我提到过 [work loop](https://medium.com/react-in-depth/inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react-e1c04700ef6e) ，并且解释了全局变量 **`nextUnitOfWork`** 的作用。需要注意的是，这个变量保留着来自 **`workInProgress`** 树且带有 work 的 Fiber 节点的引用。当 React 在遍历整棵 Fiber 树时，它会根据这个变量来判断是否还有携带着未完成 work 的 Fiber 节点。
 
@@ -151,8 +151,6 @@ function updateClassComponent(current, workInProgress, Component, ...) {
     return finishClassComponent(current, workInProgress, Component, shouldUpdate, ...);
 }
 ```
-
-## 处理 ClickCounter Fiber 中的更新
 
 我们已经有了 **`ClickCounter`** 组件的实例，所以让我们来看下 [**`updateClassInstance`**](https://github.com/facebook/react/blob/6938dcaacbffb901df27782b7821836961a5b68d/packages/react-reconciler/src/ReactFiberClassComponent.js#L976) 这个函数。这正是 React 在 class 组件中处理大部分工作的地方。下面是在该函数中按顺序执行的最重要的几个操作：
 
@@ -324,3 +322,6 @@ export const Update = 0b00000000100;
 之后，当 React 在为 **`span`** Fiber 节点处理 work 时，会将 props 复制到 **`memoizedProps`** 中去并且添加相应的 effects 以便执行后续的 DOM 更新。
 
 好的，这应该就是 React 在 render 阶段为 **`ClickCounter`** Fiber 节点所做的所有工作。因为 button 节点是 **`ClickCounter`** 组件的第一个子节点，它将会被分配给 **`nextUnitOfWork`** 变量。在 button 节点上并没有需要完成的 work ，因此 React 会直接移动到它的兄弟节点，也就是 **`span`** Fiber 节点。通过我[先前的文章](https://medium.com/react-in-depth/inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react-e1c04700ef6e)可以看到，这个过程是在 **`completeUnitOfWork`** 函数中进行的。
+
+## 处理 Span Fiber 节点的更新
+
