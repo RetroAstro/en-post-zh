@@ -152,3 +152,175 @@ function updateClassComponent(current, workInProgress, Component, ...) {
 }
 ```
 
+## 处理 ClickCounter Fiber 中的更新
+
+我们已经有了 **`ClickCounter`** 组件的实例，所以让我们来看下 [**`updateClassInstance`**](https://github.com/facebook/react/blob/6938dcaacbffb901df27782b7821836961a5b68d/packages/react-reconciler/src/ReactFiberClassComponent.js#L976) 这个函数。这正是 React 在 class 组件中处理大部分工作的地方。下面是在该函数中按顺序执行的最重要的几个操作：
+
+* 调用 **`UNSAFE_componentWillReceiveProps()`** 钩子方法 ( 弃用 )
+* 在 **`updateQueue`** 中处理更新并生成新的 state
+* 调用带有新的 state 作为参数的 **`getDerivedStateFromProps`** 方法并返回最终的 state
+* 调用 **`shouldComponentUpdate`** 方法来判断组件是否想要更新；如果返回 **`false`** ，则跳过整个渲染过程，包括在组件以及它的子组件上调用 **`render`** 方法；若返回 **`true`** 则进行组件更新。
+* 调用 **`UNSAFE_componentWillUpdate`** 方法 ( 弃用 )
+* 添加 effect 以便触发 **`componentDidUpdate`** 生命周期方法
+
+> 虽然调用 **`componentDidUpdate`** 方法的 effect 是在 **`render`** 阶段添加的，但是该方法真正调用的时刻其实是在接下来的 **`commit`** 阶段。
+
+* 在组件实例上更新 **`state`** 和 **`props`**
+
+> 组件实例上的 **`state`** 和 **`props`** 应该在 **`render`** 方法调用之前更新，这是因为 **`render`** 方法最终的输出往往依赖于 **`state`** 和 **`props`** 。如果我们不进行更新的话，那么每次就只会返回相同的结果。
+
+下面是该函数的简化版本：
+
+```js
+function updateClassInstance(current, workInProgress, ctor, newProps, ...) {
+    const instance = workInProgress.stateNode;
+
+    const oldProps = workInProgress.memoizedProps;
+    instance.props = oldProps;
+    if (oldProps !== newProps) {
+        callComponentWillReceiveProps(workInProgress, instance, newProps, ...);
+    }
+
+    let updateQueue = workInProgress.updateQueue;
+    if (updateQueue !== null) {
+        processUpdateQueue(workInProgress, updateQueue, ...);
+        newState = workInProgress.memoizedState;
+    }
+
+    applyDerivedStateFromProps(workInProgress, ...);
+    newState = workInProgress.memoizedState;
+
+    const shouldUpdate = checkShouldComponentUpdate(workInProgress, ctor, ...);
+    if (shouldUpdate) {
+        instance.componentWillUpdate(newProps, newState, nextContext);
+        workInProgress.effectTag |= Update;
+        workInProgress.effectTag |= Snapshot;
+    }
+
+    instance.props = newProps;
+    instance.state = newState;
+
+    return shouldUpdate;
+}
+```
+
+我在上面的代码片段中删去了一些不必要的辅助代码。对于组件实例来说，在调用生命周期方法或者添加为触发这些方法的 effect 时，React 会检查组件中是否有 **`componentDidUpdate`** 方法，并且使用 **`typeof`** 操作符来判断。举个例子，React 是怎样在 effect 添加到组件实例之前去检查 **`componentDidUpdate`** 方法的。
+
+```js
+if (typeof instance.componentDidUpdate === 'function') {
+    workInProgress.effectTag |= Update;
+}
+```
+
+好的，现在我们知道在 render 阶段 React 为 **`ClickCounter`** Fiber 节点执行了哪些操作。接下来让我们看看这些操作是如何改变 Fiber 节点上的值。当 React 开始处理 work 时，**`ClickCounter`** 组件对应的 Fiber 节点会像下面这样：
+
+```js
+{
+    effectTag: 0,
+    elementType: class ClickCounter,
+    firstEffect: null,
+    memoizedState: {count: 0},
+    type: class ClickCounter,
+    stateNode: {
+        state: {count: 0}
+    },
+    updateQueue: {
+        baseState: {count: 0},
+        firstUpdate: {
+            next: {
+                payload: (state, props) => {…}
+            }
+        },
+        ...
+    }
+}
+```
+
+当 work 被处理完成后，我们又会得到一个新的 Fiber 节点：
+
+```js
+{
+    effectTag: 4,
+    elementType: class ClickCounter,
+    firstEffect: null,
+    memoizedState: {count: 1},
+    type: class ClickCounter,
+    stateNode: {
+        state: {count: 1}
+    },
+    updateQueue: {
+        baseState: {count: 1},
+        firstUpdate: null,
+        ...
+    }
+}
+```
+
+**请花一点时间观察这两个 Fiber 节点上属性的不同。**
+
+在更新执行完之后，**`memoizedState`** 和 **`updateQueue.baseState`** 中的 **`count`** 属性都变为 1 。组件实例中的 state 也进行了更新。
+
+在这个点上，队列中已经没有后续的更新操作，因而 **`firstUpdate`** 为 **`null`** 。更重要的是，我们发现 **`effectTag`** 属性也发生了改变。它的值从 **`0`** 变成了 **`4`** 。转换为二进制是 **`100`** ，这意味着设置了第三个位，而这正是 **`Update`** [副作用标记](https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/shared/ReactSideEffectTags.js)的位：
+
+```js
+export const Update = 0b00000000100;
+```
+
+总结一下，当 React 在处理 **`ClickCounter`** Fiber 节点时，会调用突变前的生命周期方法，更新 state 以及定义相关的 side-effects 。
+
+## 协调 ClickCounter Fiber 下的子节点
+
+当 **`ClickCounter`** Fiber 节点上的工作完成后，React 接下来会调用 [finishClassComponent](https://github.com/facebook/react/blob/340bfd9393e8173adca5380e6587e1ea1a23cefa/packages/react-reconciler/src/ReactFiberBeginWork.js#L355) 函数。在这里 React 会调用组件实例上的 **`render`** 方法并对从组件中返回的子节点使用 diff 算法进行比较。[文档](https://reactjs.org/docs/reconciliation.html#the-diffing-algorithm)中对该算法进行了高度概括。下面是其中的一部分：
+
+> *当比较相同类型的 React 元素时，React 会观察两者的属性，保留相同的 DOM 节点，只更新那些发生改变的属性。*
+
+如果再深入一点，我们会发现比较的其实是 React 元素上对应的 Fiber 节点。但我现在不会详细介绍，因为这个过程过于复杂。我会单独写一篇文章并将重点放在子节点的协调上。
+
+> 如果你很着急想知道其中的细节，可以看看 [reconcileChildrenArray](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactChildFiber.js#L732) 函数，因为在我们的应用程序中，**`render`** 方法最终会返回 React 元素的数组。
+
+在这个点上有两件重要的事情需要我们理解。**首先**，当 React 在进行子节点的协调过程时，**它会为从 `render` 方法返回的子代 React 元素创建或更新相应的 Fiber 节点**。**`finishClassComponent`** 函数会返回当前 Fiber 节点的子节点的引用。而它会被分配给 **`nextUnitOfWork`** 并在之后的 work loop 中处理。**其次**，React 会将**更新子节点上的 props **作为其父节点上 work 的一部分执行。为了做到这点，React 会使用从 **`render`** 方法返回的 React 元素中的数据。
+
+例如，这是 React 在协调 **`ClickCounter`** Fiber 的子节点之前 **`span`** 元素对应的 Fiber 节点：
+
+```js
+
+{
+    stateNode: new HTMLSpanElement,
+    type: "span",
+    key: "2",
+    memoizedProps: {children: 0},
+    pendingProps: {children: 0},
+    ...
+}
+```
+
+如你所见，**`memoizedProps`** 和 **`pendingProps`** 下的 **`children`** 此时都为 0 。下面是从 **`render`** 方法中返回的 **`span`** 元素对应的 React 元素的结构：
+
+```js
+{
+    $$typeof: Symbol(react.element)
+    key: "2"
+    props: {children: 1}
+    ref: null
+    type: "span"
+}
+```
+
+如你所见，在 Fiber 节点与 React 元素中的 props **是有所不同的**。在 [**`createWorkInProgress`**](https://github.com/facebook/react/blob/769b1f270e1251d9dbdce0fcbd9e92e502d059b8/packages/react-reconciler/src/ReactFiber.js#L326) 函数中会创建备用的 Fiber 节点，**React 会将 React 元素上更新的 props 复制到 Fiber 节点中去**。
+
+因此，当 React 完成了对 **`ClickCounter`** 组件所有子节点的协调工作后，**`span`** Fiber 节点就会拥有更新过的 **`pendingProps`** 。此时就与 **`span`** React 元素中的 props 相匹配。
+
+```js
+{
+    stateNode: new HTMLSpanElement,
+    type: "span",
+    key: "2",
+    memoizedProps: {children: 0},
+    pendingProps: {children: 1},
+    ...
+}
+```
+
+之后，当 React 在为 **`span`** Fiber 节点处理 work 时，会将 props 复制到 **`memoizedProps`** 中去并且添加相应的 effects 以便执行后续的 DOM 更新。
+
+好的，这应该就是 React 在 render 阶段为 **`ClickCounter`** Fiber 节点所做的所有工作。因为 button 节点是 **`ClickCounter`** 组件的第一个子节点，它将会被分配给 **`nextUnitOfWork`** 变量。在 button 节点上并没有需要完成的 work ，因此 React 会移动到它的兄弟节点，也就是 **`span`** Fiber 节点。通过我[先前的文章](https://medium.com/react-in-depth/inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react-e1c04700ef6e)可以看到，这个过程是在 **`completeUnitOfWork`** 函数中进行的。
