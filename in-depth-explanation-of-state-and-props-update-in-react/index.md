@@ -260,7 +260,7 @@ if (typeof instance.componentDidUpdate === 'function') {
 
 在更新执行完之后，**`memoizedState`** 和 **`updateQueue.baseState`** 中的 **`count`** 属性都变为 1 。组件实例中的 state 也进行了更新。
 
-在这个点上，队列中已经没有后续的更新操作，因而 **`firstUpdate`** 为 **`null`** 。更重要的是，我们发现 **`effectTag`** 属性也发生了改变。它的值从 **`0`** 变成了 **`4`** 。转换为二进制是 **`100`** ，这意味着设置了第三个位，而这正是 **`Update`** [副作用标记](https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/shared/ReactSideEffectTags.js)的位：
+在这个点上，队列中已经没有后续的更新操作，所以 **`firstUpdate`** 为 **`null`** 。更重要的是，我们发现 **`effectTag`** 属性也发生了改变。它的值从 **`0`** 变成了 **`4`** 。转换为二进制是 **`100`** ，这意味着设置了第三个位，而这正是 **`Update`** [副作用标记](https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/shared/ReactSideEffectTags.js)的位：
 
 ```js
 export const Update = 0b00000000100;
@@ -276,9 +276,9 @@ export const Update = 0b00000000100;
 
 如果再深入一点，我们会发现比较的其实是 React 元素上对应的 Fiber 节点。但我现在不会详细介绍，因为这个过程过于复杂。我会单独写一篇文章并将重点放在子节点的协调上。
 
-> 如果你很着急想知道其中的细节，可以看看 [reconcileChildrenArray](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactChildFiber.js#L732) 函数，因为在我们的应用程序中，**`render`** 方法最终会返回 React 元素的数组。
+> *如果你很着急想知道其中的细节，可以看看 [reconcileChildrenArray](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactChildFiber.js#L732) 函数，因为在我们的应用程序中，**`render`** 方法最终会返回 React 元素的数组。* 
 
-在这个点上有两件重要的事情需要我们理解。**首先**，当 React 在进行子节点的协调过程时，**它会为从 `render` 方法返回的子代 React 元素创建或更新相应的 Fiber 节点**。**`finishClassComponent`** 函数会返回当前 Fiber 节点的子节点的引用。而它会被分配给 **`nextUnitOfWork`** 并在之后的 work loop 中处理。**其次**，React 会将**更新子节点上的 props **作为其父节点上 work 的一部分执行。为了做到这点，React 会使用从 **`render`** 方法返回的 React 元素中的数据。
+在这个点上有两件重要的事情需要我们理解。**首先**，当 React 在进行子节点的协调过程时，**它会为从 `render` 方法返回的子代 React 元素创建或更新相应的 Fiber 节点**。**`finishClassComponent`** 函数会返回当前 Fiber 节点的子节点的引用。而它会被分配给 **`nextUnitOfWork`** 并在之后的 work loop 中处理。**其次**，React 会将**更新子节点上的 props** 作为其父节点上 work 的一部分执行。为了做到这点，React 会使用从 **`render`** 方法返回的 React 元素中的数据。
 
 例如，这是 React 在协调 **`ClickCounter`** Fiber 的子节点之前 **`span`** 元素对应的 Fiber 节点：
 
@@ -323,4 +323,4 @@ export const Update = 0b00000000100;
 
 之后，当 React 在为 **`span`** Fiber 节点处理 work 时，会将 props 复制到 **`memoizedProps`** 中去并且添加相应的 effects 以便执行后续的 DOM 更新。
 
-好的，这应该就是 React 在 render 阶段为 **`ClickCounter`** Fiber 节点所做的所有工作。因为 button 节点是 **`ClickCounter`** 组件的第一个子节点，它将会被分配给 **`nextUnitOfWork`** 变量。在 button 节点上并没有需要完成的 work ，因此 React 会移动到它的兄弟节点，也就是 **`span`** Fiber 节点。通过我[先前的文章](https://medium.com/react-in-depth/inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react-e1c04700ef6e)可以看到，这个过程是在 **`completeUnitOfWork`** 函数中进行的。
+好的，这应该就是 React 在 render 阶段为 **`ClickCounter`** Fiber 节点所做的所有工作。因为 button 节点是 **`ClickCounter`** 组件的第一个子节点，它将会被分配给 **`nextUnitOfWork`** 变量。在 button 节点上并没有需要完成的 work ，因此 React 会直接移动到它的兄弟节点，也就是 **`span`** Fiber 节点。通过我[先前的文章](https://medium.com/react-in-depth/inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react-e1c04700ef6e)可以看到，这个过程是在 **`completeUnitOfWork`** 函数中进行的。
