@@ -40,7 +40,7 @@ class ClickCounter extends React.Component {
 }
 ```
 
-在这里，我还将 **`componentDidUpdate`** 生命周期方法添加到了组件中。这是为了展示在 **`commit`** 阶段，React 是如何通过添加副作用来调用该方法的。
+在这里，我还将 **`componentDidUpdate`** 生命周期方法添加到了组件中。这是为了展示在 **`commit`** 阶段，React 是如何通过添加 [effects](https://medium.com/react-in-depth/inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react-e1c04700ef6e) 来调用该方法的。
 
 在本篇文章中我想向你展示 React 是如何执行 state 更新以及它是如何构建 effects 列表的。我们将会深入理解 **`render`** 阶段与 **`commit`** 阶段中的高级函数。
 
@@ -258,7 +258,7 @@ if (typeof instance.componentDidUpdate === 'function') {
 
 在更新执行完之后，**`memoizedState`** 和 **`updateQueue.baseState`** 中的 **`count`** 属性都变为 1 。组件实例中的 state 也进行了更新。
 
-在这个点上，队列中已经没有后续的更新操作，所以 **`firstUpdate`** 为 **`null`** 。更重要的是，我们发现 **`effectTag`** 属性也发生了改变。它的值从 **`0`** 变成了 **`4`** 。转换为二进制是 **`100`** ，这意味着设置了第三个位，而这正是 **`Update`** [副作用标记](https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/shared/ReactSideEffectTags.js)的位：
+在这个点上，队列中已经没有后续的更新操作，所以 **`firstUpdate`** 为 **`null`** 。更重要的是，我们发现 **`effectTag`** 属性也发生了改变。它的值从 **`0`** 变成了 **`4`** 。转换为二进制是 **`100`** ，这意味着设置了第三个位，而这正是 **`Update`** [effect tag](https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/shared/ReactSideEffectTags.js) 的位：
 
 ```js
 export const Update = 0b00000000100;
@@ -424,7 +424,7 @@ function completeWork(current, workInProgress, ...) {
 
 ## Effects 列表
 
-在我们的例子中，因为在 **`span`** 节点和 **`ClickCounter`** 组件上都有副作用存在，React 会在 **`span`** Fiber 节点上添加指向 **`HostFiber`** 中 **`firstEffect`** 属性的链接。
+在我们的例子中，因为在 **`span`** 节点和 **`ClickCounter`** 组件上都有 effects 存在，React 会在 **`span`** Fiber 节点上添加指向 **`HostFiber`** 中 **`firstEffect`** 属性的链接。
 
 React 会在 [**`completeUnitOfWork`**](https://github.com/facebook/react/blob/d5e1bf07d086e4fc1998653331adecddcd0f5274/packages/react-reconciler/src/ReactFiberScheduler.js#L999) 函数中构建 effects 列表。下面是一棵带有为更新 **`span`** 节点文本内容以及在 **`ClickCounter`** 上调用 hooks 函数的 effects 的 Fiber 树：
 
@@ -444,7 +444,7 @@ root.finishedWork = null;
 
 和 **`render`** 阶段不同的是，**`commit`** 阶段总是同步的因此它可以安全地更新 **`HostRoot`** 以提示 **`commit`** 阶段已经开始。
 
-在 **`commit`** 阶段 React 会执行更新 DOM 的操作以及调用 post-mutation 生命周期方法比如 **`componentDidUpdate`** 。为了做到这一点，React 会遍历整个在 **`render`** 阶段就已经初始化完成的 effects 列表并且调用它们。
+在 **`commit`** 阶段 React 会执行更新 DOM 的操作以及调用 post mutation 生命周期方法比如 **`componentDidUpdate`** 。为了做到这一点，React 会遍历整个在 **`render`** 阶段就已经初始化完成的 effects 列表并且调用它们。
 
 我们有在 **`render`** 阶段就已经定义好的 **`span`** 与 **`ClickCounter`** 节点的 effects ：
 
