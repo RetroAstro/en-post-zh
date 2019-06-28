@@ -325,3 +325,245 @@ export const Update = 0b00000000100;
 
 ## 处理 Span Fiber 节点的更新
 
+所以，变量 **`nextUnitOfWork`** 现在指向的是 **`span`** Fiber 的备用节点，React 开始完成在它上面的工作。与在 **`ClickCounter`** 上执行的步骤类似，我们从 [**`beginWork`**](https://github.com/facebook/react/blob/cbbc2b6c4d0d8519145560bd8183ecde55168b12/packages/react-reconciler/src/ReactFiberBeginWork.js#L1489) 函数开始。
+
+因为我们的 **`span`** 节点属于 **`HostComponent`** 类型，所以这次在 switch 语句下的分支大概会像下面这样：
+
+```js
+function beginWork(current$$1, workInProgress, ...) {
+    ...
+    switch (workInProgress.tag) {
+        case FunctionalComponent: {...}
+        case ClassComponent: {...}
+        case HostComponent:
+          return updateHostComponent(current, workInProgress, ...);
+        case ...
+}
+```
+
+它会返回 [**`updateHostComponent`**](https://github.com/facebook/react/blob/cbbc2b6c4d0d8519145560bd8183ecde55168b12/packages/react-reconciler/src/ReactFiberBeginWork.js#L686) 函数，可以看到它与 class 组件的 **`updateClassComponent`** 函数是并行的。对于函数式组件来说对应的则是 **`updateFunctionComponent`** 函数。你可以在 [**`ReactFiberBeginWork.js`**](https://github.com/facebook/react/blob/1034e26fe5e42ba07492a736da7bdf5bf2108bc6/packages/react-reconciler/src/ReactFiberBeginWork.js) 文件中找到所有相关的函数。
+
+## 协调 Span Fiber 下的子节点
+
+在我们的例子中 **`updateHostComponent`** 函数的 **`span`** 节点并没有发生任何重要的事情。
+
+当 **`beginWork`** 结束后，我们会进入到 **`completeWork`** 函数中去。但在这之前，React 需要更新 **`span`** Fiber 上的 **`memoizedProps`** 。你可能还记得在协调 **`ClickCounter`** 组件下的子节点时，React 会更新 **`span`** Fiber 节点上的 **`pendingProps`** 。
+
+```js
+{
+    stateNode: new HTMLSpanElement,
+    type: "span",
+    key: "2",
+    memoizedProps: {children: 0},
+    pendingProps: {children: 1},
+    ...
+}
+```
+
+所以当 **`span`** Fiber 下的 **`beginWork`** 函数完成时，React 将更新 **`pendingProps`** 来匹配 **`memoizedProps`** ：
+
+```js
+function performUnitOfWork(workInProgress) {
+    ...
+    next = beginWork(current$$1, workInProgress, nextRenderExpirationTime);
+    workInProgress.memoizedProps = workInProgress.pendingProps;
+    ...
+}
+```
+
+在这之后 React 会调用 **`completeWork`** 函数，它与先前的 **`beginWork`** 类似也是由 switch 语句构成：
+
+```js
+function completeWork(current, workInProgress, ...) {
+    ...
+    switch (workInProgress.tag) {
+        case FunctionComponent: {...}
+        case ClassComponent: {...}
+        case HostComponent: {
+            ...
+            updateHostComponent(current, workInProgress, ...);
+        }
+        case ...
+    }
+}
+```
+
+因为我们的 **`span`** Fiber 节点是 **`HostComponent`** ，所以会调用 [**`updateHostComponent`**](https://github.com/facebook/react/blob/cbbc2b6c4d0d8519145560bd8183ecde55168b12/packages/react-reconciler/src/ReactFiberBeginWork.js#L686) 函数。在该函数中 React 大概会执行以下几个操作：
+
+* 准备 DOM 的更新
+* 将更新推入 **`span`** Fiber 中的 **`updateQueue`** 队列
+* 添加 effect 以便执行后续的 DOM 更新
+
+在这些操作执行以前，**`span`** Fiber 节点会像下面这样：
+
+```js
+{
+    stateNode: new HTMLSpanElement,
+    type: "span",
+    effectTag: 0
+    updateQueue: null
+    ...
+}
+```
+
+当所有的 work 完成后则会变成下面这样：
+
+```js
+{
+    stateNode: new HTMLSpanElement,
+    type: "span",
+    effectTag: 4,
+    updateQueue: ["children", "1"],
+    ...
+}
+```
+
+注意观察 **`effectTag`** 与 **`updateQueue`** 属性值的不同。**`effectTag`** 上的值由 **`0`** 变成了 **`4`** 。它的二进制是 **`100`** ，意味着它在第三位，对应着 **`Update`** side-effect 标记。这也是 React 将在 commit 阶段需要为此节点所做的唯一工作。**`updateQueue`** 字段携带着将在更新阶段使用的负载。
+
+当 React 处理完 **`ClickCounter`** 以及子节点下的 work 后，在 **`render`** 阶段中的工作就基本完成了。现在可以将完整的备用树分配给在 **`FiberRoot`** 上的 **`finishedWork`** 属性。这是一棵需要被映射到屏幕上的新树。这个过程可以在 **`render`** 阶段完成后立刻执行或者在浏览器空闲的时候再次执行。
+
+## Effects 列表
+
+在我们的例子中，因为在 **`span`** 节点和 **`ClickCounter`** 组件上都有副作用存在，React 会在 **`span`** Fiber 节点上添加指向 **`HostFiber`** 中 **`firstEffect`** 属性的链接。
+
+React 会在 [**`completeUnitOfWork`**](https://github.com/facebook/react/blob/d5e1bf07d086e4fc1998653331adecddcd0f5274/packages/react-reconciler/src/ReactFiberScheduler.js#L999) 函数中构建 effects 列表。下面是一棵带有为更新 **`span`** 节点文本内容以及在 **`ClickCounter`** 上调用 hooks 函数的 effects 的 Fiber 树：
+
+![](./assets/effects-tree.png)
+
+这是带有 effects 的节点线性列表：
+
+![](./assets/effects-list.png)
+
+## Commit 阶段
+
+这个阶段我们以 [**`completeRoot`**](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactFiberScheduler.js#L2306) 函数开始。在开始之前，React 会把 **`FiberRoot`** 上的 **`finishedWork`** 属性设为 **`null`** ：
+
+```js
+root.finishedWork = null;
+```
+
+和 **`render`** 阶段不同的是，**`commit`** 阶段总是同步的因此它可以安全地更新 **`HostRoot`** 以提示 **`commit`** 阶段已经开始。
+
+在 **`commit`** 阶段 React 会执行更新 DOM 的操作以及调用 post-mutation 生命周期方法比如 **`componentDidUpdate`** 。为了做到这一点，React 会遍历整个在 **`render`** 阶段就已经初始化完成的 effects 列表并且调用它们。
+
+我们有在 **`render`** 阶段就已经定义好的 **`span`** 与 **`ClickCounter`** 节点的 effects ：
+
+```js
+{ type: ClickCounter, effectTag: 5 }
+{ type: 'span', effectTag: 4 }
+```
+
+**`ClickCounter`** 的 effect tag 值为 **`5`** 转换为二进制为 **`101`** ，而这相当于 **`Update`** work 中的为 class 组件调用 **`componentDidUpdate`** 生命周期方法。最低有效位也代表着此时的 Fiber 节点在 **`render`** 阶段已经完成了所有的 work 。
+
+**`span`** 的 effect tag 值为 **`4`** 转换为二进制为 **`100`** ，这定义了在 host 组件上的 DOM 更新工作。在我们的 **`span`** 元素中，React 会更新该元素上的 **`textContent`** 。
+
+### 处理 effects
+
+让我们来看看 React 是如何处理这些 effects 的。在 [**`commitRoot`**](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactFiberScheduler.js#L523) 函数中包含了三个子函数：
+
+```js
+function commitRoot(root, finishedWork) {
+    commitBeforeMutationLifecycles()
+    commitAllHostEffects();
+    root.current = finishedWork;
+    commitAllLifeCycles();
+}
+```
+
+在每个子函数中都实现了遍历整个 effects 列表并检查 effects 类型的方法。当 React 找到与该子函数目的相关的 effect 时就会立刻调用它。在我们的例子中，React 会调用 **`ClickCounter`** 组件下的 **`componentDidUpdate`** 生命周期方法并更新 **`span`** 元素上的文本内容。
+
+第一个子函数 [**`commitBeforeMutationLifeCycles`**](https://github.com/facebook/react/blob/fefa1269e2a67fa5ef0992d5cc1d6114b7948b7e/packages/react-reconciler/src/ReactFiberCommitWork.js#L183) 寻找的是 **`Snapshot`** effect 并且会调用 **`getSnapshotBeforeUpdate`** 生命周期方法。但是，因为我们没有在 **`ClickCounter`** 组件中实现这个方法，所以 React 并没有在 **`render`** 阶段添加这个 effect 。因此在我们的例子中，这个函数不会做任何事情。
+
+### 更新 DOM
+
+下一步 React 会调用 [**`commitAllHostEffects`**](https://github.com/facebook/react/blob/95a313ec0b957f71798a69d8e83408f40e76765b/packages/react-reconciler/src/ReactFiberScheduler.js#L376) 函数。在这里 React 会让 **`span`** 元素中的文本从 **`0`** 变为 **`1`** 。而对于 **`ClickCounter`** Fiber 节点来说则没有需要完成的 work ，因为在该 class 组件上没有任何的 DOM 更新。
+
+该函数的重点在于选择正确类型的 effect 并执行相应的操作。在我们的例子中，我们需要更新 **`span`** 元素下的文本，所以我们的 **`Update`** 分支会像下面这样：
+
+```js
+function updateHostEffects() {
+    switch (primaryEffectTag) {
+      case Placement: {...}
+      case PlacementAndUpdate: {...}
+      case Update:
+        {
+          var current = nextEffect.alternate;
+          commitWork(current, nextEffect);
+          break;
+        }
+      case Deletion: {...}
+    }
+}
+```
+
+通过调用 **`commitWork`** 函数，我们最终会进入 [**`updateDOMProperties`**](https://github.com/facebook/react/blob/8a8d973d3cc5623676a84f87af66ef9259c3937c/packages/react-dom/src/client/ReactDOMComponent.js#L326) 函数。它会接收在 **`render`** 阶段加在 Fiber 节点上的 **`updateQueue`** 负载，然后更新 **`span`** 元素的 **`textContent`** 属性：
+
+```js
+
+function updateDOMProperties(domElement, updatePayload, ...) {
+  for (let i = 0; i < updatePayload.length; i += 2) {
+    const propKey = updatePayload[i];
+    const propValue = updatePayload[i + 1];
+    if (propKey === STYLE) { ...} 
+    else if (propKey === DANGEROUSLY_SET_INNER_HTML) {...} 
+    else if (propKey === CHILDREN) {
+      setTextContent(domElement, propValue);
+    } else {...}
+  }
+}
+```
+
+在 DOM 更新执行完后，React 会将 **`finishedWork`** 树分配给 **`HostRoot`** 。这将备用树设置为了 current 树：
+
+```js
+root.current = finishedWork;
+```
+
+### 调用 post mutation 生命周期方法
+
+最后一个子函数是 [**`commitAllLifeCycles`**](https://github.com/facebook/react/blob/d5e1bf07d086e4fc1998653331adecddcd0f5274/packages/react-reconciler/src/ReactFiberScheduler.js#L479) 函数。在这里 React 会调用 post mutation 生命周期方法。在 **`render`** 阶段，React 将 **`Update`** effect 添加到了 **`ClickCounter`** 组件上。这是 **`commitAllLifeCycles`** 函数寻找的 effects 之一并且会调用 **`componentDidUpdate`** 生命周期方法：
+
+```js
+function commitAllLifeCycles(finishedRoot, ...) {
+    while (nextEffect !== null) {
+        const effectTag = nextEffect.effectTag;
+
+        if (effectTag & (Update | Callback)) {
+            const current = nextEffect.alternate;
+            commitLifeCycles(finishedRoot, current, nextEffect, ...);
+        }
+        
+        if (effectTag & Ref) {
+            commitAttachRef(nextEffect);
+        }
+        
+        nextEffect = nextEffect.nextEffect;
+    }
+}
+```
+
+该函数同时也会更新 [refs](https://reactjs.org/docs/refs-and-the-dom.html) ，但我们并没有用到该功能。[**`commitLifeCycles`**](https://github.com/facebook/react/blob/e58ecda9a2381735f2c326ee99a1ffa6486321ab/packages/react-reconciler/src/ReactFiberCommitWork.js#L351) 函数被调用：
+
+```js
+
+function commitLifeCycles(finishedRoot, current, ...) {
+  ...
+  switch (finishedWork.tag) {
+    case FunctionComponent: {...}
+    case ClassComponent: {
+      const instance = finishedWork.stateNode;
+      if (finishedWork.effectTag & Update) {
+        if (current === null) {
+          instance.componentDidMount();
+        } else {
+          ...
+          instance.componentDidUpdate(prevProps, prevState, ...);
+        }
+      }
+    }
+    case HostComponent: {...}
+    case ...
+}
+```
+
+在这里可以看到，当组件第一次渲染的时候 React 会调用 **`componentDidMount`** 生命周期方法。
