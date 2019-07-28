@@ -37,9 +37,9 @@
 设计模式类型
 -----------------
 
-* [创建型](#creational-design-patterns)
-* [结构型](#structural-design-patterns)
-* [行为型](#behavioral-design-patterns) 
+* [创建型](#创建型设计模式)
+* [结构型](#结构型设计模式)
+* [行为型](#行为型设计模式) 
 
 
 创建型设计模式
@@ -53,12 +53,12 @@
 
 > 在软件工程中，创建型模式是处理对象创建的设计模式，试图根据实际情况使用合适的方式创建对象。基本的对象创建方式可能会导致设计上的问题，或增加设计的复杂度。创建型模式通过以某种方式控制对象的创建来解决问题。
 
- * [简单工厂模式](#-simple-factory)
- * [工厂方法模式](#-factory-method)
- * [抽象工厂模式](#-abstract-factory)
- * [建造者模式](#-builder)
- * [原型模式](#-prototype)
- * [单例模式](#-singleton)
+ * [简单工厂模式](#-简单工厂模式)
+ * [工厂方法模式](#-工厂方法模式)
+ * [抽象工厂模式](#-抽象工厂模式)
+ * [建造者模式](#-建造者模式)
+ * [原型模式](#-原型模式)
+ * [单例模式](#-单例模式)
 
 🏠 简单工厂模式
 --------------
@@ -481,13 +481,13 @@ president.presidentsPrivateInformation // Outputs undefined
 
 > 在软件工程中，结构型设计模式是通过找寻实现实体间关系的简单方法来简化设计的设计模式。
 
- * [适配器模式](#-adapter)
- * [桥模式](#-bridge)
- * [组合模式](#-composite)
- * [装饰器模式](#-decorator)
- * [外观模式](#-facade)
- * [享元模式](#-flyweight)
- * [代理模式](#-proxy) 
+ * [适配器模式](#-适配器模式)
+ * [桥模式](#-桥模式)
+ * [组合模式](#-组合模式)
+ * [装饰器模式](#-装饰器模式)
+ * [外观模式](#-外观模式)
+ * [享元模式](#-享元模式)
+ * [代理模式](#-代理模式) 
 
 🔌 适配器模式
 -------
@@ -1125,16 +1125,16 @@ door.close() // Closing lab door
 
 > 在软件工程中，行为型设计模式是识别对象之间的共同通信模式并实现这些模式的设计模式。 通过这样做，这些模式增加了执行该通信的灵活性。
 
-* [职责链模式](#-chain-of-responsibility)
-* [命令模式](#-command)
-* [迭代器模式](#-iterator)
-* [中介者模式](#-mediator)
-* [备忘录模式](#-memento)
-* [观察者模式](#-observer)
-* [访问者模式](#-visitor)
-* [策略模式](#-strategy)
-* [状态模式](#-state)
-* [模版方法模式](#-template-method) 
+* [职责链模式](#-职责链模式)
+* [命令模式](#-命令模式)
+* [迭代器模式](#-迭代器模式)
+* [中介者模式](#-中介者模式)
+* [备忘录模式](#-备忘录模式)
+* [观察者模式](#-观察者模式)
+* [访问者模式](#-访问者模式)
+* [策略模式](#-策略模式)
+* [状态模式](#-状态模式)
+* [模版方法模式](#-模版方法模式) 
 
 🔗 职责链模式
 -----------------------
@@ -1235,13 +1235,13 @@ bank.pay(259)
 
 现实生活中的例子
 
-> 一个常见的例子是当你在饭店点餐时，你 ( `Client` ) 让服务员 ( `Invoker` ) 给你一些食物 ( `Command` ) ，服务员会将请求递给会做饭的厨师 ( `Receiver` ) 。
+> 一个常见的例子是当你在饭店点餐时，你 ( `Client` ) 会让服务员 ( `Invoker` ) 给你一些食物 ( `Command` ) ，服务员则会将请求递给会做饭的厨师 ( `Receiver` ) 。
 >
 > 另一个例子是你 ( `Client` ) 可以通过遥控器 ( `Invoker` ) 切换 ( `Command` ) 电视 ( `Receiver` ) 的频道。
 
 简单地来说
 
-> 命令模式允许您将操作封装在对象中。该模式背后的关键思想是提供将客户端与接收器分离的方法。
+> 命令模式允许你将操作封装在对象中。该模式背后的关键思想是提供将客户端与接收者分离的方法。
 
 维基百科上的解释
 
@@ -1263,7 +1263,7 @@ class Bulb {
     }
 }
 ```
-然后我们有一个每个命令都要实现的 Command 接口，这个接口中包含很多命令。
+然后我们有一个每个命令都需要实现的 Command 接口，这个接口中包含着很多命令。
 
 ```js
 /*
@@ -1311,7 +1311,7 @@ class TurnOffCommand {
     }
 }
 ```
-然后我们有一个调用者 ( `Invoker` ) ，它会接收并执行命令。
+下面是我们的调用者 ( `Invoker` ) 类，它会接收并执行命令。
 
 ```js
 // Invoker
@@ -1339,17 +1339,21 @@ remote.submit(turnOff) // Darkness!
 ➿ 迭代器模式
 --------
 
-Real world example
-> An old radio set will be a good example of iterator, where user could start at some channel and then use next or previous buttons to go through the respective channels. Or take an example of MP3 player or a TV set where you could press the next and previous buttons to go through the consecutive channels or in other words they all provide an interface to iterate through the respective channels, songs or radio stations.  
+现实生活中的例子
 
-In plain words
-> It presents a way to access the elements of an object without exposing the underlying presentation.
+> 旧收音机将会是迭代器模式中一个很好的例子，用户可以从某个频道开始，通过按下向前或者向后键按钮来收听不同频道的节目。或者以 MP3 播放器或电视机为例，你可以按下向前或向后键按钮来查看后续的频道，换句话说，它们都提供了一个接口来遍历各个频道、歌曲或者电台。
 
-Wikipedia says
-> In object-oriented programming, the iterator pattern is a design pattern in which an iterator is used to traverse a container and access the container's elements. The iterator pattern decouples algorithms from containers in some cases, algorithms are necessarily container-specific and thus cannot be decoupled.
+简单地来说
 
-**Programmatic example**
- Translating our radio stations example from above. First of all we have `RadioStation`
+> 它提供了一种可以访问对象元素但又不暴露底层表示的方法。
+
+维基百科上的解释
+
+> 在面向对象编程中，迭代器模式是一种设计模式，其中迭代器用于遍历容器并访问容器中的元素。 在某些情况下，迭代器模式将算法与容器分离，算法必然是特定于容器的，因此不能解耦。
+
+**编程示例** 
+
+让我们以电台频道为例，首先我们有一个 `RadioStation` 类。
 
 ```js
 class RadioStation {
@@ -1362,7 +1366,7 @@ class RadioStation {
     }
 }
 ```
-Then we have our iterator
+然后我们有自己的迭代器类
 
 ```js
 class StationList {
@@ -1382,7 +1386,7 @@ class StationList {
     }
 }
 ```
-And then it can be used as
+最后它可以这样使用
 ```js
 const stationList = new StationList()
 
@@ -1396,23 +1400,26 @@ stationList.stations.forEach(station => console.log(station.getFrequency()))
 stationList.removeStation(new RadioStation(89)) // Will remove station 89
 ```
 
-👽 Mediator
-========
+👽 中介者模式
+-------
 
-Real world example
-> A general example would be when you talk to someone on your mobile phone, there is a network provider sitting between you and them and your conversation goes through it instead of being directly sent. In this case network provider is mediator. 
+现实生活中的例子
 
-In plain words
-> Mediator pattern adds a third party object (called mediator) to control the interaction between two objects (called colleagues). It helps reduce the coupling between the classes communicating with each other. Because now they don't need to have the knowledge of each other's implementation. 
+> 一个常见的例子是当你在手机上与某人通话时，你和他人的对话信息是通过网络提供商的设备进行传输而不是直接发送。在这个例子中网络提供商就是一个中介者。
 
-Wikipedia says
-> In software engineering, the mediator pattern defines an object that encapsulates how a set of objects interact. This pattern is considered to be a behavioral pattern due to the way it can alter the program's running behavior.
+简单地来说
 
-**Programmatic Example**
+> 中介者模式增加了一个第三方对象（称为中介者）来控制两个对象（称为同事）间的交互。该模式有助于减少两个类间通信的耦合程度。因为现在它们并不需要知道各自内部的实现。
 
-Here is the simplest example of a chat room (i.e. mediator) with users (i.e. colleagues) sending messages to each other. 
+维基百科上的解释
 
-First of all, we have the mediator i.e. the chat room 
+> 在软件工程中，中介者模式定义了一个对象，该对象封装了一组对象的交互方式。 由于它可以改变程序的运行时行为，因此这种模式被认为是一种行为型设计模式。
+
+**编程示例** 
+
+下面是一个最简版的聊天室（中介者），用户（同事）能够通过聊天室向其他用户发送消息。
+
+首先，我们来实现聊天室这个中介者类。
 
 ```js
 // Mediator
@@ -1426,7 +1433,8 @@ class ChatRoom {
 }
 ```
 
-Then we have our users i.e. colleagues
+下面是我们的用户（同事）类
+
 ```js
 class User {
     constructor(name, chatMediator) {
@@ -1443,7 +1451,7 @@ class User {
     }
 }
 ```
-And the usage
+最后它可以这样使用
 ```js
 const mediator = new ChatRoom()
 
@@ -1458,24 +1466,27 @@ jane.send('Hey!')
 // Feb 14, 10:58 [Jane]: Hey!
 ```
 
-💾 Memento
+💾 备忘录模式
 -------
-Real world example
-> Take the example of calculator (i.e. originator), where whenever you perform some calculation the last calculation is saved in memory (i.e. memento) so that you can get back to it and maybe get it restored using some action buttons (i.e. caretaker). 
+现实生活中的例子
 
-In plain words
-> Memento pattern is about capturing and storing the current state of an object in a manner that it can be restored later on in a smooth manner.
+> 让我们以计算器为例，当你在执行一些计算时，最后一次计算的结果总会保存在内存中，这样做是为了方便你回来访问它，当然你也可以通过某些动作按钮来恢复该计算结果。
 
-Wikipedia says
-> The memento pattern is a software design pattern that provides the ability to restore an object to its previous state (undo via rollback).
+简单地来说
 
-Usually useful when you need to provide some sort of undo functionality.
+> 备忘录模式是一种能够捕获并存储当前对象状态的方法，在之后我们能以平稳的方式恢复该对象状态。
 
-**Programmatic Example**
+维基百科上的解释
 
-Lets take an example of text editor which keeps saving the state from time to time and that you can restore if you want.
+> 备忘录模式是一种软件设计模式，它提供了一种将对象恢复到其先前状态的能力（以回滚的方式撤销）。
 
-First of all we have our memento object that will be able to hold the editor state
+通常在需要提供某种撤销功能时该模式非常有用。
+
+**编程示例**
+
+让我们以文字编辑器为例，它能够实时地保存文字状态以便恢复到先前的某个时刻。
+
+首先我们有一个用来保存编辑器状态的备忘录对象。
 
 ```js
 class EditorMemento {
@@ -1489,7 +1500,7 @@ class EditorMemento {
 }
 ```
 
-Then we have our editor i.e. originator that is going to use memento object
+然后我们有一个使用备忘录对象的编辑器
 
 ```js
 class Editor {
@@ -1515,7 +1526,7 @@ class Editor {
 }
 ```
 
-And then it can be used as 
+最后它可以这样使用
 
 ```js
 const editor = new Editor()
@@ -1539,23 +1550,27 @@ editor.restore(saved)
 console.log(editor.getContent()) // This is the first sentence. This is second.
 ```
 
-😎 Observer
+😎 观察者模式
 --------
 
-(Otherwise known as _"pub-sub"_)
+（又被称作是“发布-订阅”模式）
 
-Real world example
-> A good example would be the job seekers where they subscribe to some job posting site and they are notified whenever there is a matching job opportunity.   
+现实生活中的例子
 
-In plain words
-> Defines a dependency between objects so that whenever an object changes its state, all its dependents are notified.
+> 一个合适的例子是，求职者订阅了某个招聘网站，只要有匹配的工作机会，他们就会得到通知。
 
-Wikipedia says
-> The observer pattern is a software design pattern in which an object, called the subject, maintains a list of its dependents, called observers, and notifies them automatically of any state changes, usually by calling one of their methods.
+简单地来说
 
-**Programmatic example**
+> 观察者模式定义了对象之间的依赖关系，当一个对象改变其自身状态时，所有依赖它的对象都会得到通知。
 
-Translating our example from above. First of all we have job seekers that need to be notified for a job posting
+维基百科上的解释
+
+> 观察者模式是一种软件设计模式，其中一个称为主体的对象维护其依赖者列表（称为观察者），通过调用主体上的某种方法，任何状态的改变都能够自动通知到所有相关的观察者。
+
+**编程示例**
+
+让我们以求职者找工作为例，首先我们需要创建一个能够收到工作通知的求职者类。
+
 ```js
 const JobPost = title => ({
     title: title
@@ -1571,7 +1586,7 @@ class JobSeeker {
     }
 }
 ```
-Then we have our job postings to which the job seekers will subscribe
+然后我们再创建一个求职者能够订阅求职信息的招聘网站
 ```js
 class JobBoard {
     constructor() {
@@ -1589,7 +1604,7 @@ class JobBoard {
     }
 }
 ```
-Then it can be used as
+最后它可以这样使用
 ```js
 // Create subscribers
 const jonDoe = new JobSeeker('John Doe')
@@ -1609,22 +1624,26 @@ jobBoard.addJob(JobPost('Software Engineer'))
 // Jane Doe has been notified of a new posting : Software Engineer
 ```
 
-🏃 Visitor
+🏃 访问者模式
 -------
-Real world example
-> Consider someone visiting Dubai. They just need a way (i.e. visa) to enter Dubai. After arrival, they can come and visit any place in Dubai on their own without having to ask for permission or to do some leg work in order to visit any place here just let them know of a place and they can visit it. Visitor pattern let's you do just that, it helps you add places to visit so that they can visit as much as they can without having to do any legwork.
+现实生活中的例子
 
-In plain words
-> Visitor pattern let's you add further operations to objects without having to modify them.
+> 假设某人去迪拜旅游，他需要进入迪拜的签证。在到达迪拜后，他可以独自参观迪拜的任何地方而不需要经过许可或者白费一些跑腿的工作，但前提是让他知道这个地方的位置。访问者模式就能够做到这点，它可以帮助你添加要访问的地点，这样你就能访问尽可能多的地方而不需要做多余的工作。
 
-Wikipedia says
-> In object-oriented programming and software engineering, the visitor design pattern is a way of separating an algorithm from an object structure on which it operates. A practical result of this separation is the ability to add new operations to existing object structures without modifying those structures. It is one way to follow the open/closed principle.
+简单地来说
 
-**Programmatic example**
+> 访问者模式能够在不修改对象的前提下为对象添加更多的操作。
 
-Let's take an example of a zoo simulation where we have several different kinds of animals and we have to make them Sound. Let's translate this using visitor pattern 
+维基百科上的解释
 
-We have our implementations for the animals
+> 在面向对象编程和软件工程中，访问者设计模式是一种将算法与其运行的对象结构分离的方法。 这种分离的实际结果是能够在不修改这些结构的情况下向现有对象结构添加新操作。 这是遵循开放 / 封闭原则的一种方式。
+
+**编程示例**
+
+让我们以动物园为例，在这里有很多种能够发出不同声音的动物。
+
+首先我们来实现动物类：
+
 ```js
 class Monkey {
     shout() {
@@ -1656,7 +1675,7 @@ class Dolphin {
     }
 }
 ```
-Let's implement our visitor
+然后我们来实现访问者类
 ```js
 const speak = {
     visitMonkey(monkey){
@@ -1671,7 +1690,7 @@ const speak = {
 }
 ```
 
-And then it can be used as
+最后它可以这样使用
 ```js
 const monkey = new Monkey()
 const lion = new Lion()
@@ -1681,7 +1700,7 @@ monkey.accept(speak)    // Ooh oo aa aa!
 lion.accept(speak)      // Roaaar!
 dolphin.accept(speak)   // Tuut tutt tuutt!
 ```
-We could have done this simply by having a inheritance hierarchy for the animals but then we would have to modify the animals whenever we would have to add new actions to animals. But now we will not have to change them. For example, let's say we are asked to add the jump behavior to the animals, we can simply add that by creating a new visitor i.e.
+我们本可以直接通过动物类来达到相同的效果，但是如果我们想要向动物类中添加新的动作，就不得不修改动物类内部的方法。通过访问者模式，我们就不必改变动物类。例如，我们想让动物能有跳跃的行为，只需要新增一个访问者类即可。
 
 ```js
 const jump = {
@@ -1696,7 +1715,7 @@ const jump = {
     }
 }
 ```
-And for the usage
+它可以这样使用
 ```js
 monkey.accept(speak)   // Ooh oo aa aa!
 monkey.accept(jump)    // Jumped 20 feet high! on to the tree!
@@ -1708,21 +1727,24 @@ dolphin.accept(speak)  // Tuut tutt tuutt!
 dolphin.accept(jump)   // Walked on water a little and disappeared
 ```
 
-💡 Strategy
+💡 策略模式
 --------
 
-Real world example
-> Consider the example of sorting, we implemented bubble sort but the data started to grow and bubble sort started getting very slow. In order to tackle this we implemented Quick sort. But now although the quick sort algorithm was doing better for large datasets, it was very slow for smaller datasets. In order to handle this we implemented a strategy where for small datasets, bubble sort will be used and for larger, quick sort.
+现实生活中的例子
 
-In plain words
-> Strategy pattern allows you to switch the algorithm or strategy based upon the situation.
+> 让我们以排序算法为例，冒泡排序算法在数据集较大的情况下会变得低效，因此我们会采取快速排序算法。虽然在数据集较大的情况下快速排序算法表现更好，但它在很小的数据集下却表现不佳。因此我们使用策略模式，在数据集较大时采用快速排序算法，数据集较小时采用冒泡排序算法。
 
-Wikipedia says
-> In computer programming, the strategy pattern (also known as the policy pattern) is a behavioural software design pattern that enables an algorithm's behavior to be selected at runtime.
+简单地来说
 
-**Programmatic example**
+> 策略模式能够让你基于具体场景切换不同的算法或者策略。
 
-Translating our example from above, we can easily implement this strategy in javascript using its feature of first class functions.
+维基百科上的例子
+
+> 在计算机编程中，策略模式是一种行为型设计模式，它可以在运行时选择算法的行为。
+
+**编程示例**
+
+让我们以上面的排序算法为例，通过 JavaScript 中函数是第一等公民的特性，我们可以轻松地实现策略模式。
 
 ```js
 const bubbleSort = dataset => {
@@ -1740,7 +1762,7 @@ const quickSort = dataset => {
 }
 ```
 
-And then we have our client that is going to use any strategy
+在这里使用不同的策略
 ```js
 const sorter = dataset => {
     if(dataset.length > 5){
@@ -1750,7 +1772,7 @@ const sorter = dataset => {
     }
 }
 ```
-And it can be used as
+最后它可以这样使用
 ```js
 const longDataSet = [1, 5, 4, 3, 2, 8]
 const shortDataSet = [1, 5, 4]
@@ -1762,30 +1784,32 @@ sorter1(longDataSet) // Output : Sorting with quick sort
 sorter2(shortDataSet) // Output : Sorting with bubble sort
 ```
 
-💢 State
+💢 状态模式
 -----
-Real world example
-> Imagine you are using some drawing application, you choose the paint brush to draw. Now the brush changes it's behavior based on the selected color i.e. if you have chosen red color it will draw in red, if blue then it will be in blue etc.  
+现实生活中的例子
 
-In plain words
-> It lets you change the behavior of a class when the state changes.
+> 假设你正在使用某个画图应用，你选择了画笔来作图。你可以选择不同的颜色来更改画笔原始的颜色。如果你选择了红色，你就能以红色的笔作图，如果你选择了蓝色，你就能以蓝色的笔作图。
 
-Wikipedia says
-> The state pattern is a behavioral software design pattern that implements a state machine in an object-oriented way. With the state pattern, a state machine is implemented by implementing each individual state as a derived class of the state pattern interface, and implementing state transitions by invoking methods defined by the pattern's superclass.
-> The state pattern can be interpreted as a strategy pattern which is able to switch the current strategy through invocations of methods defined in the pattern's interface
+简单地来说
 
-**Programmatic example**
+> 状态模式能够在状态发生改变时改变类的行为。
 
-Let's take an example of text editor, it let's you change the state of text that is typed i.e. if you have selected bold, it starts writing in bold, if italic then in italics etc.
+维基百科上的解释
 
-First of all we have our transformation functions
+> 状态模式是一种行为型设计模式，它以面向对象的方式实现状态机。 使用状态模式，通过将每个单独的状态实现为状态模式接口的派生类来实现状态机，并通过调用由模式的超类定义的方法来实现状态转换。 状态模式可以解释为一种策略模式，它能够通过调用模式接口中定义的方法来切换当前策略。
+
+**编程示例**
+
+让我们以文本编辑器为例，它能够改变文本的显示状态。如果你选择了粗号字体，文本就会变粗，如果你选择了斜体，文本就会显示为斜体。
+
+首先我们实现了文字转换的函数
 
 ```js
 const upperCase = inputString => inputString.toUpperCase()
 const lowerCase = inputString => inputString.toLowerCase()
 const defaultTransform = inputString => inputString
 ```
-Then we have our editor
+然后是我们的文本编辑器类
 ```js
 class TextEditor {
     constructor(transform) {
@@ -1801,7 +1825,7 @@ class TextEditor {
     }
 }
 ```
-And then it can be used as
+最后它可以这样使用
 ```js
 const editor = new TextEditor(defaultTransform)
 
@@ -1825,28 +1849,34 @@ editor.type('Fifth line')
 // fifth line
 ```
 
-📒 Template Method
+📒 模版方法模式
 ---------------
 
-Real world example
-> Suppose we are getting some house built. The steps for building might look like 
-> - Prepare the base of house
-> - Build the walls
-> - Add roof
-> - Add other floors
-> The order of these steps could never be changed i.e. you can't build the roof before building the walls etc but each of the steps could be modified for example walls can be made of wood or polyester or stone.
+现实生活中的例子
 
-In plain words
-> Template method defines the skeleton of how certain algorithm could be performed but defers the implementation of those steps to the children classes.
+> 假设我们正在建造一间房子。建造的步骤可能会像下面这样
+>
+> * 准备房子的基础设施
+> * 建造房子的墙
+> * 添加房顶
+> * 添加地板
+>
+> 这些步骤的顺序基本不会改变，因为你不可能在建造房子的墙之前去添加地板，但是每个步骤的具体内容却可以发生改变，比如墙的材质可以由木头、聚酯或者石头制成。
 
-Wikipedia says
-> In software engineering, the template method pattern is a behavioral design pattern that defines the program skeleton of an algorithm in an operation, deferring some steps to subclasses. It lets one redefine certain steps of an algorithm without changing the algorithm's structure.
+简单地来说
 
-**Programmatic Example**
+> 模版方法模式定义了如何执行某些算法的框架，但是将这些步骤的实现推迟到了子类。
 
-Imagine we have a build tool that helps us test, lint, build, generate build reports (i.e. code coverage reports, linting report etc) and deploy our app on the test server.
+维基百科上的解释
 
-First of all we have our base class that specifies the skeleton for the build algorithm
+> 在软件工程中，模板方法模式是一种行为型设计模式，它定义了操作中算法的程序框架，将一些步骤推迟到子类。 它允许重新定义算法的某些步骤而不改变算法的结构。
+
+**编程示例** 
+
+假设我们正在编写一个帮助我们测试、规范、构建、生成构建报告（代码覆盖率, 代码规范）的工具，并且最后它还能将应用部署到测试服务器上。
+
+首先我们来实现一个具有基本框架的构建算法类
+
 ```js
 class Builder {
     // Template method 
@@ -1859,7 +1889,7 @@ class Builder {
 }
 ```
 
-Then we can have our implementations
+然后我们在子类中实现具体的步骤
 
 ```js
 class AndroidBuilder extends Builder {
@@ -1898,7 +1928,7 @@ class IosBuilder extends Builder {
     }
 }
 ```
-And then it can be used as
+最后它可以这样使用
 
 ```js
 const androidBuilder = new AndroidBuilder()
@@ -1920,16 +1950,3 @@ iosBuilder.build()
 // Deploying ios build to server
 ```
 
-## 🚦 Wrap Up Folks
-
-And that about wraps it up. I will continue to improve this, so you might want to watch/star this repository to revisit. Also, I have plans on writing the same about the architectural patterns, stay tuned for it.
-
-## 👬 Contribution
-
-- Report issues
-- Open pull request with improvements
-- Spread the word
-
-## License
-MIT © [Soham Kamani](http://sohamkamani.com)
-Based on ["Design patterns for humans"](https://github.com/kamranahmedse/design-patterns-for-humans) Copyright 2017 Kamran Ahmed
