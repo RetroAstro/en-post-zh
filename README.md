@@ -24,5 +24,5 @@ React
 设计模式
 -----
 
-:book:  [超简单的设计模式指南](./design-patterns-for-humans/index.md)
+[:book:](./design-patterns-for-humans/words.md)  [超简单的设计模式指南](./design-patterns-for-humans/index.md)
 
