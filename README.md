@@ -1,11 +1,11 @@
-# 译文
+译文
+-----
 
 > 翻译优质技术外文，在有效学习的同时还能提升自己的英语水平  (๑•̀ㅂ•́)و✧
 >
 > 左侧 :book: 中有对应文章的词汇  ٩(๑˃́ꇴ˂̀๑)۶
 
-React
------
+**React**
 
 [:book:](./why-isnt-x-a-hook/words.md)  [为什么 X 不是 Hook ？](./why-isnt-x-a-hook/index.md)
 
@@ -21,13 +21,11 @@ React
 
 [:book:](./why-react-suspense-will-be-a-game-changer/words.md)  [为什么 React Suspense 将会逆转 Web 应用开发的游戏规则 ？](./why-react-suspense-will-be-a-game-changer/index.md)
 
-设计模式
------
+**设计模式**
 
 [:book:](./design-patterns-for-humans/words.md)  [超简单的设计模式指南](./design-patterns-for-humans/index.md)
 
-测试开发
------
+**测试开发**
 
 :book:  [JavaScript 单元测试指南](./unit-testing-guide-in-javascript/index.md)
 
