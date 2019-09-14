@@ -26,3 +26,8 @@ React
 
 [:book:](./design-patterns-for-humans/words.md)  [超简单的设计模式指南](./design-patterns-for-humans/index.md)
 
+测试开发
+-----
+
+[:book:]  [JavaScript 单元测试指南](./unit-testing-guide-in-javascript/index.md)
+
