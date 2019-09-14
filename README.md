@@ -29,5 +29,5 @@ React
 测试开发
 -----
 
-[:book:]  [JavaScript 单元测试指南](./unit-testing-guide-in-javascript/index.md)
+:book:  [JavaScript 单元测试指南](./unit-testing-guide-in-javascript/index.md)
 
