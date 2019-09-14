@@ -5,7 +5,7 @@
 >
 > 左侧 :book: 中有对应文章的词汇  ٩(๑˃́ꇴ˂̀๑)۶
 
-**React**
+**前端框架**
 
 [:book:](./why-isnt-x-a-hook/words.md)  [为什么 X 不是 Hook ？](./why-isnt-x-a-hook/index.md)
 
