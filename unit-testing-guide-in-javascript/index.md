@@ -6,7 +6,7 @@
   + [单元测试](#unit-tests)
   + [设计原则](#design-principles)
 2. 指南
-  + [尽可能地使用 TDD ( 测试驱动开发 )](#尽可能地使用-TDD-(-测试驱动开发-))
+  + [尽可能地使用 TDD (测试驱动开发)](#尽可能地使用-TDD-(测试驱动开发))
   + [正确地组织测试](#正确地组织测试)
   + [正确地为测试命名](#正确地为测试命名) 
   + [不要在测试中添加注释](#不要在测试中添加注释)
@@ -17,15 +17,15 @@
   + [熟悉你的测试框架 API](#熟悉你的测试框架-API) 
   + [不要在同一测试中测试多个关注点](#不要在同一测试中测试多个关注点) 
   + [要覆盖一般情况与边缘情况](#要覆盖一般情况与边缘情况) 
-  + [在应用 TDD 时，总是从编写最简单的失败测试开始](#在应用-TDD-时，总是从编写最简单的失败测试开始) 
-  + [在应用 TDD 时，总是在每个测试优先的周期中小步前进](#在应用-TDD-时，总是在每个测试优先的周期中小步前进) 
-  + [测试行为，而不是内部实现](#测试行为，而不是内部实现) 
+  + [在应用 TDD 时，总是从编写最简单的失败测试开始](#在应用-TDD-时-总是从编写最简单的失败测试开始) 
+  + [在应用 TDD 时，总是在每个测试优先的周期中小步前进](#在应用-TDD-时-总是在每个测试优先的周期中小步前进) 
+  + [测试行为，而不是内部实现](#测试行为-而不是内部实现) 
   + [不要 mock 所有数据](#不要-mock-所有数据) 
   + [为每个 bug 创建新的测试](#为每个-bug-创建新的测试) 
   + [不要为复杂的用户交互编写单元测试](#不要为复杂的用户交互编写单元测试) 
   + [测试简单的用户操作](#测试简单的用户操作) 
   + [首先审查测试代码](#首先审查测试代码) 
-  + [在编码中实践，通过结对编程学习](#在编码中实践，通过结对编程学习) 
+  + [在编码中实践，通过结对编程学习](#在编码中实践-通过结对编程学习) 
 3. [参考资料](#参考资料) 
 
 ## 通则
@@ -58,7 +58,7 @@
 
 它们应该与正在测试的代码具有相同的质量级别。它们也能通过重构来增强代码自身的可维护性与可读性。
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 设计原则
 
@@ -74,7 +74,7 @@
 
 + 避免全局状态
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ## 指南
 
@@ -88,11 +88,11 @@
 
 下文所有的测试用例都以 [Jasmine](http://jasmine.github.io) 框架为基础。
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ---------------------------------------
 
-### 尽可能地使用 TDD ( 测试驱动开发 )
+### 尽可能地使用 TDD (测试驱动开发)
 
 TDD is a _design process_, not a testing process. TDD is a robust way of designing software components ("units") interactively so that their behaviour is specified through unit tests.
 
@@ -115,7 +115,7 @@ How? Why?
 
 Note that code written without a test-first approach is often very hard to test.
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 正确地组织测试
 
@@ -161,7 +161,7 @@ describe('A set of functionalities', () => {
 });
 ```
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 正确地为测试命名
 
@@ -230,7 +230,7 @@ describe('The Gallery instance', () => {
 });
 ```
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 不要在测试中添加注释
 
@@ -238,7 +238,7 @@ Never. Ever. Tests have a reason to be or not.
 
 Don't comment them out because they are too slow, too complex or produce false negatives. Instead, make them fast, simple and trustworthy. If not, remove them completely.
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 在测试中要避免逻辑
 
@@ -304,7 +304,7 @@ it('should sanitize a filename containing more than one dot', () => {
 });
 ```
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 不要写不必要的断言
 
@@ -336,7 +336,7 @@ it('should multiply the number passed as parameter and subtract one', () => {
 
 This will improve maintainability. Your test is no longer tied to implementation details.
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 正确地初始化应用于所有相关测试的操作
 
@@ -437,7 +437,7 @@ describe('Saving the user profile', () => {
 
 Consider keeping the setup code minimal to preserve readability and maintainability.
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 考虑在测试中使用工厂函数
 
@@ -600,7 +600,7 @@ describe('The search component', () => {
 });
 ```
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 熟悉你的测试框架 API
 
@@ -654,7 +654,7 @@ The handy `fit` function used in the example above allows you to execute only on
 
 More information on the [Jasmine website](http://jasmine.github.io).
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 不要在同一测试中测试多个关注点
 
@@ -683,7 +683,7 @@ it('should update the profile view properly', () => {
 
 Beware that writing "AND" or "OR" when naming your test smells bad...
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 要覆盖一般情况与边缘情况
 
@@ -724,7 +724,7 @@ describe('The RPN expression evaluator', () => {
 });
 ```
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 在应用 TDD 时，总是从编写最简单的失败测试开始
 
@@ -746,7 +746,7 @@ it('should return an empty string when passed an empty string', () => {
 
 From there, start building the functionalities incrementally.
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 在应用 TDD 时，总是在每个测试优先的周期中小步前进
 
@@ -803,7 +803,7 @@ describe('The RPN expression evaluator', () => {
 });
 ```
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 测试行为，而不是内部实现
 
@@ -840,7 +840,7 @@ Con:
 
 Here, a balance has to be found, unit-testing some key parts can be beneficial.
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 不要 mock 所有数据
 
@@ -967,13 +967,13 @@ In particular, consider using the "real" version of the objects if:
 + the code being tested does not make AJAX requests, API calls or browser page reloads
 + the speed of execution of the tests stays *within the limits you fixed*
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 为每个 bug 创建新的测试
 
 Whenever a bug is found, create a test that replicates the problem **before touching any code**. From there, you can apply TDD as usual to fix it.
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 不要为复杂的用户交互编写单元测试
 
@@ -987,7 +987,7 @@ These interactions might involve many units of work and should be handled at a h
 
 For functional testing, consider using a test automation framework ([Selenium](http://docs.seleniumhq.org/), ...) or QA manual testing.
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 测试简单的用户操作
 
@@ -1032,7 +1032,7 @@ Note how simple the test is because the UI (DOM) layer does not mix with the bus
 
 The next step could be to test the business logic implemented in "showPreview()" or "hidePreview()".
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 首先审查测试代码
 
@@ -1040,13 +1040,13 @@ When reviewing code, always start by reading the code of the tests. Tests are mi
 
 It will help you understand the intent of the developer very quickly (could be just by looking at the names of the tests).
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ### 在编码中实践，通过结对编程学习
 
 Because experience is the _only_ teacher. Ultimately, greatness comes from practicing; applying the theory over and over again, using feedback to get better every time.
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
 ## 📙 参考资料
 
@@ -1081,5 +1081,5 @@ Because experience is the _only_ teacher. Ultimately, greatness comes from pract
 + Mocha: https://mochajs.org/
 + Tape: https://github.com/substack/tape
 
-• [返回目录](#目录) •
+• [返回目录](#-目录) •
 
