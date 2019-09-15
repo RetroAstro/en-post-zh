@@ -19,7 +19,7 @@
   + [要覆盖一般情况与边缘情况](#要覆盖一般情况与边缘情况) 
   + [在应用 TDD 时, 总是从编写最简单的失败测试开始](#在应用-TDD-时-总是从编写最简单的失败测试开始) 
   + [在应用 TDD 时, 总是在每个测试优先的周期中小步前进](#在应用-TDD-时-总是在每个测试优先的周期中小步前进) 
-  + [测试行为，而不是内部实现](#测试行为-而不是内部实现) 
+  + [测试行为, 而不是内部实现](#测试行为-而不是内部实现) 
   + [不要 mock 所有数据](#不要-mock-所有数据) 
   + [为每个 bug 创建新的测试](#为每个-bug-创建新的测试) 
   + [不要为复杂的用户交互编写单元测试](#不要为复杂的用户交互编写单元测试) 
@@ -726,7 +726,7 @@ describe('The RPN expression evaluator', () => {
 
 • [返回目录](#-目录) •
 
-### 在应用 TDD 时，总是从编写最简单的失败测试开始
+### 在应用 TDD 时, 总是从编写最简单的失败测试开始
 
 **:(**
 
@@ -748,7 +748,7 @@ From there, start building the functionalities incrementally.
 
 • [返回目录](#-目录) •
 
-### 在应用 TDD 时，总是在每个测试优先的周期中小步前进
+### 在应用 TDD 时, 总是在每个测试优先的周期中小步前进
 
 Build your tests suite from the simple case to the more complex ones. Keep in mind the incremental design. Deliver software fast, incrementally, and in short iterations.
 
@@ -805,7 +805,7 @@ describe('The RPN expression evaluator', () => {
 
 • [返回目录](#-目录) •
 
-### 测试行为，而不是内部实现
+### 测试行为, 而不是内部实现
 
 **:(**
 
@@ -1042,7 +1042,7 @@ It will help you understand the intent of the developer very quickly (could be j
 
 • [返回目录](#-目录) •
 
-### 在编码中实践，通过结对编程学习
+### 在编码中实践, 通过结对编程学习
 
 Because experience is the _only_ teacher. Ultimately, greatness comes from practicing; applying the theory over and over again, using feedback to get better every time.
 
