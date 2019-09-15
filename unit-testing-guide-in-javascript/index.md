@@ -6,7 +6,7 @@
   + [单元测试](#unit-tests)
   + [设计原则](#design-principles)
 2. 指南
-  + [尽可能地使用 TDD ( 测试驱动开发 )](尽可能地使用%20TDD%20(%20测试驱动开发%20))
+  + [尽可能地使用&nbsp;TDD&nbsp;(&nbsp;测试驱动开发&nbsp;)](#尽可能地使用&nbsp;TDD&nbsp;(&nbsp;测试驱动开发&nbsp;))
   + [正确地组织测试](#正确地组织测试)
   + [正确地为测试命名](#正确地为测试命名) 
   + [不要在测试中添加注释](#不要在测试中添加注释)
@@ -14,14 +14,14 @@
   + [不要写不必要的断言](#不要写不必要的断言) 
   + [正确地初始化应用于所有相关测试的操作](#正确地初始化应用于所有相关测试的操作) 
   + [考虑在测试中使用工厂函数](#考虑在测试中使用工厂函数) 
-  + [熟悉你的测试框架 API](#熟悉你的测试框架%20API) 
+  + [熟悉你的测试框架&nbsp;API](#熟悉你的测试框架&nbsp;API) 
   + [不要在同一测试中测试多个关注点](#不要在同一测试中测试多个关注点) 
   + [要覆盖一般情况与边缘情况](#要覆盖一般情况与边缘情况) 
-  + [在应用 TDD 时，总是从编写最简单的失败测试开始](#在应用%20TDD%20时，总是从编写最简单的失败测试开始) 
-  + [在应用 TDD 时，总是在每个测试优先的周期中小步前进](#在应用%20TDD%20时，总是在每个测试优先的周期中小步前进) 
+  + [在应用&nbsp;TDD&nbsp;时，总是从编写最简单的失败测试开始](#在应用&nbsp;TDD&nbsp;时，总是从编写最简单的失败测试开始) 
+  + [在应用&nbsp;TDD&nbsp;时，总是在每个测试优先的周期中小步前进](#在应用&nbsp;TDD&nbsp;时，总是在每个测试优先的周期中小步前进) 
   + [测试行为，而不是内部实现](#测试行为，而不是内部实现) 
-  + [不要 mock 所有数据](#不要%20mock%20所有数据) 
-  + [为每个 bug 创建新的测试](#为每个%20bug%20创建新的测试) 
+  + [不要&nbsp;mock&nbsp;所有数据](#不要&nbsp;mock&nbsp;所有数据) 
+  + [为每个&nbsp;bug&nbsp;创建新的测试](#为每个&nbsp;bug&nbsp;创建新的测试) 
   + [不要为复杂的用户交互编写单元测试](#不要为复杂的用户交互编写单元测试) 
   + [测试简单的用户操作](#测试简单的用户操作) 
   + [首先审查测试代码](#首先审查测试代码) 
@@ -92,7 +92,7 @@
 
 ---------------------------------------
 
-### 尽可能地使用 TDD ( 测试驱动开发 )
+### 尽可能地使用&nbsp;TDD&nbsp;(&nbsp;测试驱动开发&nbsp;)
 
 TDD is a _design process_, not a testing process. TDD is a robust way of designing software components ("units") interactively so that their behaviour is specified through unit tests.
 
@@ -602,7 +602,7 @@ describe('The search component', () => {
 
 • [返回目录](#目录) •
 
-### 熟悉你的测试框架 API
+### 熟悉你的测试框架&nbsp;API
 
 The API documentation of the testing framework/library should be your bedside book!
 
@@ -726,7 +726,7 @@ describe('The RPN expression evaluator', () => {
 
 • [返回目录](#目录) •
 
-### 在应用 TDD 时，总是从编写最简单的失败测试开始
+### 在应用&nbsp;TDD&nbsp;时，总是从编写最简单的失败测试开始
 
 **:(**
 
@@ -748,7 +748,7 @@ From there, start building the functionalities incrementally.
 
 • [返回目录](#目录) •
 
-### 在应用 TDD 时，总是在每个测试优先的周期中小步前进
+### 在应用&nbsp;TDD&nbsp;时，总是在每个测试优先的周期中小步前进
 
 Build your tests suite from the simple case to the more complex ones. Keep in mind the incremental design. Deliver software fast, incrementally, and in short iterations.
 
@@ -842,7 +842,7 @@ Here, a balance has to be found, unit-testing some key parts can be beneficial.
 
 • [返回目录](#目录) •
 
-### 不要 mock 所有数据
+### 不要&nbsp;mock&nbsp;所有数据
 
 **:(**
 
@@ -969,7 +969,7 @@ In particular, consider using the "real" version of the objects if:
 
 • [返回目录](#目录) •
 
-### 为每个 bug 创建新的测试
+### 为每个&nbsp;bug&nbsp;创建新的测试
 
 Whenever a bug is found, create a test that replicates the problem **before touching any code**. From there, you can apply TDD as usual to fix it.
 
