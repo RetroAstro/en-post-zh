@@ -1,4 +1,6 @@
-# JavaScript 单元测试指南
+> 原文地址：https://github.com/mawrkus/js-unit-testing-guide
+>
+> 原文作者：https://github.com/mawrkus
 
 ## 📖 目录
 
@@ -9,7 +11,7 @@
   + [尽可能地使用 TDD](#尽可能地使用-TDD)
   + [正确地组织测试](#正确地组织测试)
   + [正确地为测试命名](#正确地为测试命名) 
-  + [不要在测试中添加注释](#不要在测试中添加注释)
+  + [不要注释测试](#不要注释测试) 
   + [在测试中要避免逻辑](#在测试中要避免逻辑) 
   + [不要写不必要的断言](#不要写不必要的断言) 
   + [正确地初始化应用于所有相关测试的操作](#正确地初始化应用于所有相关测试的操作) 
@@ -18,7 +20,7 @@
   + [不要在同一测试中测试多个关注点](#不要在同一测试中测试多个关注点) 
   + [要覆盖一般情况与边缘情况](#要覆盖一般情况与边缘情况) 
   + [在应用 TDD 时, 总是从编写最简单的失败测试开始](#在应用-TDD-时-总是从编写最简单的失败测试开始) 
-  + [在应用 TDD 时, 总是在每个测试优先的周期中小步前进](#在应用-TDD-时-总是在每个测试优先的周期中小步前进) 
+  + [在应用 TDD 时, 总是在每个测试优先周期中小步前进](#在应用-TDD-时-总是在每个测试优先周期中小步前进) 
   + [测试行为, 而不是内部实现](#测试行为-而不是内部实现) 
   + [不要 mock 所有数据](#不要-mock-所有数据) 
   + [为每个 bug 创建新的测试](#为每个-bug-创建新的测试) 
@@ -93,32 +95,30 @@
 
 ### 尽可能地使用 TDD
 
-TDD is a _design process_, not a testing process. TDD is a robust way of designing software components ("units") interactively so that their behaviour is specified through unit tests.
+TDD ( 测试驱动开发 ) 是一个设计过程，而不是测试过程。TDD 是一种以交互式设计软件组件（“单元”）的强大方式，在单元测试中我们就能够指定相关的行为。
 
-How? Why? 
+#### 测试优先周期
 
-#### Test-first cycle
+1. 编写一个简单的失败测试
+2. 用最少的代码让测试通过，且不要去担心代码质量
+3. 使用设计原则 / 模式重构代码
 
-1. Write a simple failing test
-2. Make the test pass by writing the minimum amount of code, don't bother with code quality
-3. Refactor the code by applying design principles/patterns
+#### 测试优先周期带来的好处
 
-#### Consequences of the test-first cycle
++ 首先编写测试能够让代码设计本身变得易于测试
++ 只需编写要实现功能的所需代码量，就可以让生成的代码库最小化，从而变得更具有可维护性
++ 代码库能够通过重构机制进行增强，因为测试能够保证新的代码并不会改变当前已有的功能
++ 在每个周期中清理代码能够让代码库更易于维护，频繁且少量地修改代码往往更不容易出错
++ 对开发者来说是一种快速反馈，你知道你没有破坏任何东西，并且在让系统往好的方向发展
++ 对于添加新特性、修复 bug 或者探索新设计更加地有自信
 
-+ Writing a test first makes the code design testable de facto
-+ Writing just the amount of code needed to implement the required functionality makes the resulting codebase minimal, thus more maintainable
-+ The codebase can be enhanced using refactoring mechanisms, the tests give you confidence that the new code is not modifying the existing functionalities
-+ Cleaning the code in each cycle makes the codebase more maintainable, it is much cheaper to change the code frequently and in small increments
-+ Fast feedback for the developers, you know that you don't break anything and that you are evolving the system in a good direction
-+ Generates confidence to add features, fix bugs, or explore new designs
-
-Note that code written without a test-first approach is often very hard to test.
+注意：那些没有使用 TDD 方式编写的代码往往都难以测试。
 
 • [返回目录](#-目录) •
 
 ### 正确地组织测试
 
-Don't hesitate to nest your suites to structure logically your tests in subsets.
+通过嵌套测试套件让子集中的测试更有逻辑性。
 
 **:(**
 
@@ -164,7 +164,7 @@ describe('A set of functionalities', () => {
 
 ### 正确地为测试命名
 
-Tests names should be concise, explicit, descriptive and in correct English. Read the output of the spec runner and verify that it is understandable! Keep in mind that someone else will read it too. Tests can be the live documentation of the code.
+测试名称应简洁、明确、描述性强且使用正确的英语。通过查看 spec runner 的输出来验证该测试名称是可以理解的。要记住测试代码也会被他人阅读，它也可以是代码的实时文档。
 
 **:(**
 
@@ -191,7 +191,7 @@ describe('The Gallery instance', () => {
 });
 ```
 
-In order to help you write test names properly, you can use the **"unit of work - scenario/context - expected behaviour"** pattern:
+为了让测试名称更加合理，你可以使用 **“工作单元 - 场景 / 上下文 - 期望行为”** 模式来命名：
 
 ```js
 describe('[unit of work]', () => {
@@ -200,7 +200,7 @@ describe('[unit of work]', () => {
 });
 ```
 
-Or whenever you have many tests that follow the same scenario or are related to the same context:
+或者当许多测试都在同一场景 / 相关上下文时：
 
 ```js
 describe('[unit of work]', () => {
@@ -211,7 +211,7 @@ describe('[unit of work]', () => {
 });
 ```
 
-For example:
+例如：
 
 **:) :)**
 
@@ -231,20 +231,20 @@ describe('The Gallery instance', () => {
 
 • [返回目录](#-目录) •
 
-### 不要在测试中添加注释
+### 不要注释测试
 
-Never. Ever. Tests have a reason to be or not.
+测试总有它存在或者不存在的理由。
 
-Don't comment them out because they are too slow, too complex or produce false negatives. Instead, make them fast, simple and trustworthy. If not, remove them completely.
+不要因为测试太慢、太复杂或者会失败就把它们注释掉，相反我们应该让其变得快速、简单且值得信赖。如果实在不行，就将它们完全移除。
 
 • [返回目录](#-目录) •
 
 ### 在测试中要避免逻辑
 
-Always use simple statements. Don't use loops and/or conditionals. If you do, you add a possible entry point for bugs in the test itself:
+总是使用简单语句。不要使用循环或者条件语句。如果这样做了，在测试代码中就可能产生 bug ：
 
-+ Conditionals: you don't know which path the test will take
-+ Loops: you could be sharing state between tests
++ 条件语句：你不知道在测试时会执行哪条语句
++ 循环语句：你可能在多个测试之间共享状态
 
 **:(**
 
@@ -277,7 +277,7 @@ it('should properly sanitize strings', () => {
 });
 ```
 
-Better: write a test for each type of sanitization. It will give a nice output of all possible cases, improving maintainability.
+更好的方式：为每种类型编写单独的测试。这样就可以输出所有可能的情况，增强代码的可维护性。
 
 **:) :)**
 
@@ -307,7 +307,7 @@ it('should sanitize a filename containing more than one dot', () => {
 
 ### 不要写不必要的断言
 
-Remember, unit tests are a design specification of how a certain *behaviour* should work, not a list of observations of everything the code happens to do.
+请记住，单元测试是特定行为应该如何工作的设计规范，而不是对代码执行的所有操作的观察列表。
 
 **:(**
 
@@ -333,7 +333,7 @@ it('should multiply the number passed as parameter and subtract one', () => {
 });
 ```
 
-This will improve maintainability. Your test is no longer tied to implementation details.
+这样做能够提高代码的可维护性，因为你的测试不再与代码的实现细节有关。
 
 • [返回目录](#-目录) •
 
@@ -389,7 +389,7 @@ describe('Saving the user profile', () => {
 });
 ```
 
-The setup code should apply to all the tests:
+初始化代码应该正确地应用于所有相关的测试：
 
 **:)**
 
@@ -434,19 +434,19 @@ describe('Saving the user profile', () => {
 });
 ```
 
-Consider keeping the setup code minimal to preserve readability and maintainability.
+考虑将初始化代码限制在最小的相关上下文中，以保持代码的可读性与可维护性。
 
 • [返回目录](#-目录) •
 
 ### 考虑在测试中使用工厂函数
 
-Factories can:
+工厂函数能够：
 
-+ help reduce the setup code, especially if you use dependency injection
-+ make each test more readable, since the creation is a single function call that can be in the test itself instead of the setup
-+ provide flexibility when creating new instances (setting an initial state, for example)
++ 帮助你减少初始化代码，特别是当你使用依赖注入时。
++ 让每个测试更具可读性，因为创建仅仅是一个函数调用，所以可以将其应用在测试本身而不是测试夹具中。
++ 在创建新的实例是更具灵活性（例如，设置初始状态）
 
-There's a trade-off to find here between applying the DRY principle and readability.
+我们需要在 DRY 原则与可读性之间寻找平衡点。
 
 **:(**
 
@@ -512,7 +512,7 @@ describe('User profile module', () => {
 });
 ```
 
-Factories are particularly useful when dealing with the DOM:
+在处理与 DOM 相关的事务时，工厂函数尤其有用：
 
 **:(**
 
@@ -603,9 +603,9 @@ describe('The search component', () => {
 
 ### 熟悉你的测试框架 API
 
-The API documentation of the testing framework/library should be your bedside book!
+你应该十分熟悉测试框架 / 库中的 API 文档。
 
-Having a good knowledge of the API can help you in reducing the size/complexity of your test code and, in general, help you during development. A simple example:
+熟悉 API 能够减少测试代码的大小 / 复杂度，并且能在开发过程中为你提供帮助。一个简单的例子：
 
 **:(**
 
@@ -649,15 +649,15 @@ it('should do something else but not now', () => {
 
 #### Note
 
-The handy `fit` function used in the example above allows you to execute only one test without having to comment out all the tests below. `fdescribe` does the same for test suites. This could help save a lot of time when developing.
+上面示例中使用的 **`fit`** 函数允许你只执行一个测试，而不必注释掉下面所有的测试。这可以帮助你在开发时节省大量的时间。
 
-More information on the [Jasmine website](http://jasmine.github.io).
+想要了解更多请参考 [Jasmine](http://jasmine.github.io) 的官方网站。
 
 • [返回目录](#-目录) •
 
 ### 不要在同一测试中测试多个关注点
 
-If a method has several end results, each one should be tested separately. Whenever a bug occurs, it will help you locate the source of the problem.
+如果一个方法中有多个期望结果，那么应该分别测试每个结果。这样当 bug 出现时，便能更快地定位到问题的源头。
 
 **:(**
 
@@ -680,13 +680,13 @@ it('should update the profile view properly', () => {
 });
 ```
 
-Beware that writing "AND" or "OR" when naming your test smells bad...
+当你的测试命名中含有 “and” 或 “or” 时，就意味着产生了代码的坏味道。
 
 • [返回目录](#-目录) •
 
 ### 要覆盖一般情况与边缘情况
 
-"Strange behaviour" usually happens at the edges... Remember that your tests can be the live documentation of your code.
+“奇怪的行为”总是在边界情况下发生 ...... 要记住你的测试应该作为代码的实时文档。
 
 **:(**
 
@@ -743,13 +743,13 @@ it('should return an empty string when passed an empty string', () => {
 });
 ```
 
-From there, start building the functionalities incrementally.
+从这里开始，逐步构建功能。
 
 • [返回目录](#-目录) •
 
-### 在应用 TDD 时, 总是在每个测试优先的周期中小步前进
+### 在应用 TDD 时, 总是在每个测试优先周期中小步前进
 
-Build your tests suite from the simple case to the more complex ones. Keep in mind the incremental design. Deliver software fast, incrementally, and in short iterations.
+构建你的测试套件，从简单到复杂。请记住增量设计，快速、增量、短迭代地交付软件。
 
 **:(**
 
@@ -817,7 +817,7 @@ it('should add a user in memory', () => {
 });
 ```
 
-A better approach is to test at the same level of the API:
+更好的方式是在相同级别的 API 上进行测试：
 
 **:)**
 
@@ -829,15 +829,15 @@ it('should add a user in memory', () => {
 });
 ```
 
-Pro:
+优点：
 
-+ Changing the internal implementation of a class/object will not necessarily force you to refactor the tests
++ 改变内部类 / 对象的实现不一定会强制你去重构相关的测试代码
 
-Con:
+缺点：
 
-+ If a test is failing, we might have to debug to know which part of the code needs to be fixed
++ 如果某个测试失败，我们就得通过调试来定位哪段代码需要被修复
 
-Here, a balance has to be found, unit-testing some key parts can be beneficial.
+在这里我们需要找到一个平衡点，但单元测试中的关键部分是有益的。
 
 • [返回目录](#-目录) •
 
@@ -970,7 +970,7 @@ In particular, consider using the "real" version of the objects if:
 
 ### 为每个 bug 创建新的测试
 
-Whenever a bug is found, create a test that replicates the problem **before touching any code**. From there, you can apply TDD as usual to fix it.
+每当发现一个 bug ，我们就应该在**修改任何代码之前**创建新的测试来重现问题，然后再采用 TDD 修复问题。
 
 • [返回目录](#-目录) •
 
@@ -1035,15 +1035,15 @@ The next step could be to test the business logic implemented in "showPreview()"
 
 ### 首先审查测试代码
 
-When reviewing code, always start by reading the code of the tests. Tests are mini use cases of the code that you can drill into.
+总是以审查测试代码为先。测试是能够让你深入研究代码的迷你示例。
 
-It will help you understand the intent of the developer very quickly (could be just by looking at the names of the tests).
+它可以帮助你快速了解开发者的意图（通过查看测试名称就可以实现）。
 
 • [返回目录](#-目录) •
 
 ### 在编码中实践, 通过结对编程学习
 
-Because experience is the _only_ teacher. Ultimately, greatness comes from practicing; applying the theory over and over again, using feedback to get better every time.
+经验就是老师。毕竟，实践出真知。反复地应用理论，并通过反馈得到更好的结果。
 
 • [返回目录](#-目录) •
 
