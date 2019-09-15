@@ -2,10 +2,10 @@
 
 ## 📖 目录
 
-1. 通则
+1. **通则**
   + [单元测试](#unit-tests)
   + [设计原则](#design-principles)
-2. 指南
+2. **指南** 
   + [尽可能地使用 TDD](#尽可能地使用-TDD)
   + [正确地组织测试](#正确地组织测试)
   + [正确地为测试命名](#正确地为测试命名) 
@@ -26,7 +26,7 @@
   + [测试简单的用户操作](#测试简单的用户操作) 
   + [首先审查测试代码](#首先审查测试代码) 
   + [在编码中实践, 通过结对编程学习](#在编码中实践-通过结对编程学习) 
-3. [参考资料](#参考资料) 
+3. **[参考资料](#-参考资料)**  
 
 ## 通则
 
@@ -1066,7 +1066,7 @@ Because experience is the _only_ teacher. Ultimately, greatness comes from pract
 + Clean code cheat sheet: http://www.planetgeek.ch/2014/11/18/clean-code-cheat-sheet-v-2-4/
 + Addy Osmani - "Learning JavaScript Design Patterns": http://addyosmani.com/resources/essentialjsdesignpatterns/book/
 
-### BDD (行为驱动开发) 
+### BDD ( 行为驱动开发 ) 
 
 + Enrique Amodeo - "Learning Behavior-driven Development with JavaScript": https://www.packtpub.com/application-development/learning-behavior-driven-development-javascript
 
