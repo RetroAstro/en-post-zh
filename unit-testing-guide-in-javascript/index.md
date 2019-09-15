@@ -867,7 +867,7 @@ describe('when the user has already visited the page', () => {
 });
 ```
 
-This test fails, because the survey is considered disabled. Let's fix this:
+上面的测试其实是失败的，因为 survey 一定是 disabled 。让我们来修复这个问题：
 
 **:)**
 
@@ -903,7 +903,7 @@ describe('when the user has already visited the page', () => {
 });
 ```
 
-This will work... but needs a lot of code. Let's try a simpler approach:
+现在这个测试能够正常工作 ...... 但这需要不少的代码。让我们来尝试更简单的方法：
 
 **:(**
 
@@ -929,8 +929,7 @@ describe('when the user has already visited the page', () => {
 });
 ```
 
-We created a permanent storage of data. What happens if we do not properly clean it?
-We might affect the other tests. Let's fix this:
+我们创建了一个永久性的数据存储。如果我们没有正确地将其清除，可能就会影响到其他的测试。让我们来修复这个问题：
 
 **:) :)**
 
@@ -954,17 +953,16 @@ describe('when the user has already visited the page', () => {
 });
 ```
 
-The `MemoryStorage` used here does not persist data. Nice and easy, with no side effects.
+**`MemoryStorage`** 并不会持久化数据，因此也不会产生副作用。
 
-#### Takeaway
+#### 注意
 
-The idea to keep in mind is that *dependencies can still be "real" objects*. Don't mock everything because you can.
-In particular, consider using the "real" version of the objects if:
+需要记住的是依赖关系仍可以是“真实”的对象。不要 mock 所有的数据。特别地，在下面的场景中我们应该使用“真实”的对象：
 
-+ it leads to a simple, nice and easy tests setup
-+ it does not create a shared state between the tests, causing unexpected side effects
-+ the code being tested does not make AJAX requests, API calls or browser page reloads
-+ the speed of execution of the tests stays *within the limits you fixed*
++ 在测试中能够简单、轻松地初始化
++ 不会在多个测试之间创建共享状态，从而导致意外的副作用
++ 被测试的代码不会执行 AJAX 请求、第三方 API 调用或者浏览器页面刷新操作
++ 测试的执行速度应该保持在你的修复范围内
 
 • [返回目录](#-目录) •
 
@@ -976,27 +974,27 @@ In particular, consider using the "real" version of the objects if:
 
 ### 不要为复杂的用户交互编写单元测试
 
-Examples of complex user interactions:
+复杂用户操作示例：
 
-+ Filling a form, drag and dropping some items then submitting the form
-+ Clicking a tab, clicking an image thumbnail then navigating through a gallery of images previously loaded from a database
-+ (...)
++ 填写表单，拖拽某个元素然后再提交表单
++ 点击选项卡，点击图像缩略图然后再浏览之前从数据库中加载的图像库
++ ( ...... )
 
-These interactions might involve many units of work and should be handled at a higher level by **functional tests**. They will take more time to execute. They could be flaky (false negatives) and they need debugging whenever a failure is reported.
+这些交互可能会涉及大量的工作单元，在这种情况下我们应该采用更高级的**功能测试**。它们可能会花费更多的时间来完成。它们可能是片状的，并且在报告失败时需要进行调试。
 
-For functional testing, consider using a test automation framework ([Selenium](http://docs.seleniumhq.org/), ...) or QA manual testing.
+对于功能测试，考虑使用自动化测试框架 ( [Selenium](https://www.seleniumhq.org/) ) 或者进行手动的 QA 测试。
 
 • [返回目录](#-目录) •
 
 ### 测试简单的用户操作
 
-Example of simple user actions:
+简单用户操作示例：
 
-+ Clicking on a link that toggles the visibility of a DOM element
-+ Submitting a form that triggers the form validation
-+ (...)
++ 通过点击链接来切换 DOM 元素的可见性
++ 提交表单进而触发相关的表单验证
++ ( ...... ) 
 
-These actions can be easily tested **by simulating DOM events**, for example:
+我们可以通过**模拟 DOM 事件**轻松地测试这些操作，例如：
 
 ```js
 describe('clicking on the "Preview profile" link', () => {
@@ -1024,12 +1022,12 @@ describe('clicking on the "Preview profile" link', () => {
 });
 ```
 
-Note how simple the test is because the UI (DOM) layer does not mix with the business logic layer:
+可以看到上面的测试是多么的简单，这是因为 UI ( DOM ) 层并没有与逻辑层耦合：
 
-+ a "click" event occurs
-+ a public method is called
++ “点击”事件被触发
++ 公共方法被调用
 
-The next step could be to test the business logic implemented in "showPreview()" or "hidePreview()".
+下一步就应该测试 “showPreview()” 或 “hidePreview()” 方法中实现的业务逻辑。
 
 • [返回目录](#-目录) •
 
