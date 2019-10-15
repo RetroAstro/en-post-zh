@@ -25,11 +25,11 @@
 
 [:book:](./design-patterns-for-humans/words.md)  [超简单的设计模式指南](./design-patterns-for-humans/index.md)
 
+**后端开发**
+
+[:book:]() 深入理解 Node.js 中的线程机制
+
 **测试开发**
 
 [:book:](./unit-testing-guide-in-javascript/words.md)  [JavaScript 单元测试指南](./unit-testing-guide-in-javascript/index.md)
-
-**Node.js**
-
-[:book:]() 深入理解 Node.js 中的线程机制
 
