@@ -48,7 +48,8 @@ fs.readFile(path.join(__dirname, './package.json'), (err, content) => {
 想要使用线程工作程序，我们就得引入 `worker_threads` 模块。首先让我们来创建一个能够帮助我们生成线程工作程序的函数，然后再讲讲它的内部实现。
 
 ```ts
-type WorkerCallback = (err: any, result?: any) => any;
+type WorkerCallback = (err: any, result?: any) => any
+
 export function runWorker(path: string, cb: WorkerCallback, workerData: object | null = null) {
  const worker = new Worker(path, { workerData })
  worker.on('message', cb.bind(null, null))
@@ -63,7 +64,7 @@ export function runWorker(path: string, cb: WorkerCallback, workerData: object |
 }
 ```
 
-为了创建线程工作程序，我们就得生成 `Worker` 类的实例。该函数的第一个参数是包含线程工作程序代码的文件路径；在第二个参数中我们提供了一个包含属性名为 `workerData` 的对象。这是我们希望线程在开始运行时能够访问的数据。
+为了创建线程工作程序，我们就得生成 `Worker` 类的实例。该函数的第一个参数是包含线程工作程序代码的文件路径，在第二个参数中我们提供了一个包含属性名为 `workerData` 的对象。这是我们希望线程在开始运行时能够访问的数据。
 
 请注意无论是使用 JavaScript 或者其他能够转译为 JavaScript 的语言（例如 TypeScript），文件路径最后的扩展名应该总是 `.js` 或者 `.mjs` 。
 
