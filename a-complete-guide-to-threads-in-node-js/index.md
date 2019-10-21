@@ -45,7 +45,7 @@ fs.readFile(path.join(__dirname, './package.json'), (err, content) => {
 
 线程工作程序 ( thread worker ) 是在单独线程中生成的一段代码（通常为一个单独的文件）
 
-想要使用线程工作程序，我们就得引入 `worker_threads` 模块。首先让我们来创建一个能够帮助我们生成线程工作程序的函数，然后再讲讲它的内部实现。
+想要使用线程工作程序，我们就得引入 `worker_threads` 模块。首先让我们来创建一个能够帮助我们生成线程工作程序的函数，然后再来讲讲它的内部实现。
 
 ```ts
 type WorkerCallback = (err: any, result?: any) => any
@@ -59,7 +59,7 @@ export function runWorker(path: string, cb: WorkerCallback, workerData: object |
   
  worker.on('exit', (exitCode) => {
    if (exitCode === 0) {
-     return null;
+     return null
    }
    return cb(new Error(`Worker has stopped with code ${exitCode}`))
  })
@@ -74,5 +74,109 @@ export function runWorker(path: string, cb: WorkerCallback, workerData: object |
 
 在这里我想指出为什么会使用回调函数的方式而不是在 `message` 事件触发时返回能够被 resolve 的 promise 。这是因为线程工作程序能够多次触发 `message` 事件，而不仅仅是一次。
 
-从上面的例子可以看出，线程之间的通信是基于事件机制的，这也就意味着我们设置了许多监听器函数，当线程工作程序触发某个事件时，相应的监听器函数就能被立即调用。
+从上面的例子可以看出，线程之间的通信是基于事件机制的，这也就意味着我们设置了许多监听器函数，当线程工作程序触发某个事件时，相应的监听器函数就会被立即调用。
 
+下面是最常见的一些事件：
+
+```js
+worker.on('error', (error) => {})
+```
+
+每当线程工作程序中出现未捕获异常时，`error` 事件就会被触发。然后线程工作程序就会被终止，错误信息则作为回调函数的第一个参数传入。
+
+```js
+worker.on('exit', (exitCode) => {})
+```
+
+当线程工作程序退出时会触发 `exit` 事件。如果在线程工作程序中出现 `process.exit()` ，回调函数中就会出现相应的 `exitCode` 。如果是通过调用 `worker.terminate()` 终止的，`exitCode` 则会为 1 。
+
+```js
+worker.on('online', () => {})
+```
+
+当线程工作程序解析完 JavaScript 代码并开始执行时，`online` 事件就会被触发。虽然这个事件不常用，但它可以在特定场景下提供信息。
+
+```js
+worker.on('message', (data) => {})
+```
+
+当线程工作程序向父线程发送数据时 `message` 事件就会被触发。
+
+现在让我们来看一下线程之间是如何共享数据的吧。
+
+在线程之间交换数据
+-----
+
+我们通过 `port.postMessage()` 方法将数据从一个线程发送到另一个线程。该方法有如下特性：
+
+```js
+port.postMessage(data[, transferList])
+```
+
+port 对象既可以是 `parentPort` 也可以是 `MessagePort` 类的实例  — 通常我们使用后者。
+
+#### data 参数
+
+该方法的第一个参数名为 `data` — 它是一个能够拷贝到其他线程的对象。它包含着拷贝算法支持的所有内容。
+
+`data` 通过[结构化克隆算法](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm)拷贝，Mozilla 上是这样解释的：
+
+> 它通过递归输入对象来构建克隆，同时保持先前访问过的引用的映射，以避免无限遍历循环。
+
+该算法并不会拷贝函数、错误、属性描述符或者原型链。同时还应该注意，这种拷贝对象的方式与 JSON 不同，因为它可以包含循环引用和类型数组，而 JSON 则不能。
+
+由于支持类型数组的拷贝，该算法使得在线程之间共享内存成为可能。
+
+#### 在线程之间共享内存
+
+人们可能会说像 `cluster` 或者 `child_process` 这样的模块在很早之前就能使用线程。这句话只说对了一半。
+
+`cluster` 模块能够在主进程下创建多个节点实例，并通过它们来控制路由请求。集群应用程序能够有效地增加服务器吞吐量。然而，我们并不能通过 `cluster` 模块生成一个单独的线程。
+
+人们倾向于使用 PM2 这样的工具来集群他们的应用程序，而不是在代码中手动实现这一过程。如果你感兴趣的话，可以看看之前我写的关于 `cluster` 模块的[文章](https://medium.freecodecamp.org/how-to-add-socket-io-to-multi-threaded-node-js-df404b424276)。
+
+`child_process` 模块能够生成任何的可执行文件，不管它是不是 JavaScript 。它与 `worker_threads` 非常类似，但却缺少了几个十分重要的特性。
+
+具体来讲，线程工作程序更加的轻量，并且它与父线程共享相同的进程 ID 。它们同时还能与其父线程共享内存，这使得它们可以避免序列化大的数据，因此可以更有效地来回发送数据。
+
+让我们来看一个如何在线程之间共享内存的例子。为了能够共享内存，`port.postMessage()` 方法中的 `data` 参数必须是 `ArrayBuffer` 或者 `SharedArrayBuffer` 类的实例对象。
+
+下面是一个线程工作程序与其父线程共享内存的例子：
+
+```js
+import { parentPort } from 'worker_threads'
+
+parentPort.on('message', () => {
+ const numberOfElements = 100
+ const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * numberOfElements)
+ const arr = new Int32Array(sharedBuffer)
+ 
+ for (let i = 0; i < numberOfElements; i += 1) {
+   arr[i] = Math.round(Math.random() * 30)
+ }
+ 
+ parentPort.postMessage({ arr })
+})
+```
+
+首先，我们用包含 100 个 32 位整数所需的内存创建了一个 `SharedArrayBuffer` 类的实例对象。然后我们又创建了 `Int32Array` 类的实例对象，并将 buffer 对象作为参数传入。最后我们用随机数字将该数组填满并发送给父线程。
+
+在父线程中，我们有着这样的逻辑代码：
+
+```js
+import path from 'path'
+import { runWorker } from '../run-worker'
+
+const worker = runWorker(path.join(__dirname, 'worker.js'), (err, { arr }) => {
+ if (err) {
+   return null
+ }
+ arr[0] = 5
+})
+
+worker.postMessage({})
+```
+
+通过将 `arr[0]` 改为 `5` ，我们其实在两个线程上都对它进行了修改。
+
+当然，共享内存也会为我们带来在一个线程中更改值而另一个线程中的值也会被更改的风险。但同时我们也获得了一个很好的特性：即值不需要被序列化就能够在另一个线程中使用，这极大地提高了效率。我们只需要记住正确地管理对数据的引用，以便垃圾收集机制对数据进行回收。
