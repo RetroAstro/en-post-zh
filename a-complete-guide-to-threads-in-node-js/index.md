@@ -76,7 +76,7 @@ export function runWorker(path: string, cb: WorkerCallback, workerData: object |
 
 从上面的例子可以看出，线程之间的通信是基于事件机制的，这也就意味着我们设置了许多监听器函数，当线程工作程序触发某个事件时，相应的监听器函数就会被立即调用。
 
-下面是最常见的一些事件：
+下面是一些最常见的事件：
 
 ```js
 worker.on('error', (error) => {})
@@ -107,7 +107,7 @@ worker.on('message', (data) => {})
 在线程之间交换数据
 -----
 
-我们通过 `port.postMessage()` 方法将数据从一个线程发送到另一个线程。该方法有如下特性：
+我们通过 `port.postMessage()` 方法将数据从一个线程发送至另一个线程。该方法有如下特性：
 
 ```js
 port.postMessage(data[, transferList])
@@ -129,13 +129,13 @@ port 对象既可以是 `parentPort` 也可以是 `MessagePort` 类的实例  
 
 #### 在线程之间共享内存
 
-人们可能会说像 `cluster` 或者 `child_process` 这样的模块在很早之前就能使用线程。这句话只说对了一半。
+人们可能会说像 `cluster` 或者 `child_process` 这样的模块在很早之前就能使用线程。但这句话只说对了一半。
 
 `cluster` 模块能够在主进程下创建多个节点实例，并通过它们来控制路由请求。集群应用程序能够有效地增加服务器吞吐量。然而，我们并不能通过 `cluster` 模块生成一个单独的线程。
 
 人们倾向于使用 PM2 这样的工具来集群他们的应用程序，而不是在代码中手动实现这一过程。如果你感兴趣的话，可以看看之前我写的关于 `cluster` 模块的[文章](https://medium.freecodecamp.org/how-to-add-socket-io-to-multi-threaded-node-js-df404b424276)。
 
-`child_process` 模块能够生成任何的可执行文件，不管它是不是 JavaScript 。它与 `worker_threads` 非常类似，但却缺少了几个十分重要的特性。
+`child_process` 模块能够生成任何的可执行文件，不管它是不是 JavaScript 。它与 `worker_threads` 非常相似，但却缺少了几个十分重要的特性。
 
 具体来讲，线程工作程序更加的轻量，并且它与父线程共享相同的进程 ID 。它们同时还能与其父线程共享内存，这使得它们可以避免序列化大的数据，因此可以更有效地来回发送数据。
 
@@ -181,5 +181,5 @@ worker.postMessage({})
 
 当然，共享内存也会为我们带来在一个线程中更改值而另一个线程中的值也会被更改的风险。但同时我们也获得了一个很好的特性：值不需要被序列化就能够在另一个线程中使用，这极大地提高了效率。我们只需要记住正确地管理对数据的引用，以便垃圾收集机制对数据进行回收。
 
-共享整数数组虽然可以，但我们真正感兴趣的是共享对象 — 存储信息最常用的方式。不幸的是，我们并没有 `SharedObjectBuffer` 类或者类似的机制，但是我们可以自己创建一个[相似的结构](https://stackoverflow.com/questions/51053222/nodejs-worker-threads-shared-object-store)。
+共享整数数组虽然可以，但我们真正感兴趣的是共享对象 — 存储信息最常用的方式。不幸的是，我们并没有 `SharedObjectBuffer` 类或者相似的机制，但是我们可以自己创建一个[相似的结构](https://stackoverflow.com/questions/51053222/nodejs-worker-threads-shared-object-store)。
 
