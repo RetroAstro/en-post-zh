@@ -181,5 +181,5 @@ worker.postMessage({})
 
 当然，共享内存也会为我们带来在一个线程中更改值而另一个线程中的值也会被更改的风险。但同时我们也获得了一个很好的特性：值不需要被序列化就能够在另一个线程中使用，这极大地提高了效率。我们只需要记住正确地管理对数据的引用，以便垃圾收集机制对数据进行回收。
 
-共享整数数组虽然可以，但我们真正感兴趣的是共享对象 — 存储信息最常用的方式。不幸的是，我们并没有 `SharedObjectBuffer` 类或者相似的机制，但是我们可以自己创建一个[相似的结构](https://stackoverflow.com/questions/51053222/nodejs-worker-threads-shared-object-store)。
+共享整数数组虽然可以，但我们真正感兴趣的是共享对象 — 存储信息最常用的方式。不幸的是，我们并没有 `SharedObjectBuffer` 类或者相似的机制，但是我们可以自己创建一个[类似的结构](https://stackoverflow.com/questions/51053222/nodejs-worker-threads-shared-object-store)。
 
