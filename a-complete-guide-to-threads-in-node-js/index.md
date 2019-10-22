@@ -143,7 +143,7 @@ port 对象既可以是 `parentPort` 也可以是 `MessagePort` 类的实例  
 
 下面是一个线程工作程序与其父线程共享内存的例子：
 
-```js
+```ts
 import { parentPort } from 'worker_threads'
 
 parentPort.on('message', () => {
@@ -163,7 +163,7 @@ parentPort.on('message', () => {
 
 在父线程中，我们有着这样的逻辑代码：
 
-```js
+```ts
 import path from 'path'
 import { runWorker } from '../run-worker'
 
@@ -195,7 +195,7 @@ worker.postMessage({})
 
 下面是一个例子：
 
-```js
+```ts
 import { parentPort } from 'worker_threads'
 
 const data = {
@@ -209,7 +209,7 @@ parentPort.postMessage(data)
 
 第二种在线程间通信的方式其实是我们自己创建一个 `MessageChannel` 类的实例，然后将它发送给线程工作程序。下面是一个如何创建 `MessageChannel` 类的实例对象并在线程工作程序间共享的例子：
 
-```js
+```ts
 import path from 'path'
 import { Worker, MessageChannel } from 'worker_threads'
 
@@ -223,5 +223,103 @@ port1.on('message', (message) => {
 worker.postMessage({ port: port2 }, [port2])
 ```
 
+在创建完 `port1` 与 `port2` 之后，我们为 `port1` 初始化相应的事件并将 `port2` 发送至线程工作程序。我们需要将 `port2` 作为 `transferList` 参数传入，这样才能够被线程工作程序使用。
 
+在线程工作程序中，我们执行如下代码：
+
+```ts
+import { parentPort, MessagePort } from 'worker_threads'
+
+parentPort.on('message', (data) => {
+ const { port }: { port: MessagePort } = data
+ port.postMessage('heres your message!')
+})
+```
+
+通过这种方式，我们便可以使用从父线程中传入的 `port` 。
+
+虽然使用 `parentPort` 并不是一种错误的方式，但通过 `MessageChannel` 类创建 `MessagePort` 并在生成的线程中共享它们才是更好的实践（关注点分离）。
+
+为了方便理解，在下文的例子中我还是继续使用 `parentPort` 。
+
+使用线程工作程序的两种方式
+-----
+
+我们可以通过两种方式使用线程工作程序。第一种是生成一个线程工作程序，执行相应的代码，然后将结果返回给父线程。在这种方式下，每次执行新任务时都必须重新创建一个线程工作程序。
+
+第二种方式是先生成一个线程工作程序，然后为它初始化相关的 `message` 事件。每当 `message` 事件被触发时，就执行相应的工作，之后再将结果发送给父线程，这样的好处在于能够复用线程工作程序。
+
+在 Node.js 文档中推荐使用第二种方式，因为创建一个线程工作程序需要耗费很多精力，我们需要创建一个虚拟机，还需要解析和执行代码。这种方式比持续不断地生成线程工作程序更加高效。
+
+这种方式被称作工作池，因为我们创建了一系列的线程工作程序并让其等待，在需要的时候再触发 `message` 事件来完成相应的工作。
+
+下面是一个文件示例，该文件包含了生成线程工作程序、执行相关代码、关闭线程工作程序的逻辑：
+
+```ts
+import { parentPort } from 'worker_threads'
+
+const collection = []
+
+for (let i = 0; i < 10; i += 1) {
+ collection[i] = i
+}
+
+parentPort.postMessage(collection)
+```
+
+在 `collection` 发送给父线程之后，该线程工作程序便会退出。
+
+下面是一个能够等待 `message` 事件被触发的线程工作程序的例子：
+
+```ts
+import { parentPort } from 'worker_threads'
+
+parentPort.on('message', (data: any) => {
+ const result = doSomething(data)
+ parentPort.postMessage(result)
+})
+```
+
+在工作线程模块中有用的属性
+-----
+
+在 `worker_threads` 模块中有几个常用的属性：
+
+#### isMainThread
+
+当没有在工作线程中进行操作时该属性会返回 `true` 。如果你需要的话，可以使用简单的 `if` 判断语句来确保文件中的代码是以线程工作程序运行的。
+
+```ts
+import { isMainThread } from 'worker_threads'
+
+if (isMainThread) {
+ throw new Error('Its not a worker')
+}
+```
+
+#### workerData
+
+在初始化 `Worker` 类时传入的参数
+
+```js
+const worker = new Worker(path, { workerData })
+```
+
+在工作线程中：
+
+```js
+import { workerData } from 'worker_threads'
+
+console.log(workerData.property)
+```
+
+#### parentPort
+
+它是前面提到的 `MessagePort` 类的实例对象，用来跟父线程进行通信。
+
+#### threadId
+
+线程工作程序的唯一标识符。
+
+到现在我们已经熟悉了 Node.js 线程机制的技术细节，下面就让我们来实现一些有趣的功能并在实践中测试我们所学的知识吧。
 
