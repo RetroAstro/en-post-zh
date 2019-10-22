@@ -183,3 +183,45 @@ worker.postMessage({})
 
 共享整数数组虽然可以，但我们真正感兴趣的是共享对象 — 存储信息最常用的方式。不幸的是，我们并没有 `SharedObjectBuffer` 类或者相似的机制，但是我们可以自己创建一个[类似的结构](https://stackoverflow.com/questions/51053222/nodejs-worker-threads-shared-object-store)。
 
+#### transferList 参数
+
+`transferList` 参数只允许包含 `ArrayBuffer` 和 `MessagePort` 类。一旦它们被转移到另一个线程，原来的线程就不能够使用它们了。因为内存被移动到了另一个线程，所以在原来的线程中就不可用了。
+
+目前，我们还不能通过 `transferList` 传送网络套接字（但我们可以通过 `child_process` 模块来实现）。
+
+#### 在线程间通信创建通道
+
+线程之间通过 port 进行通信。第一种情况是默认也是更简单的通信方式。在线程工作程序的文件代码中，我们引入了 `worker_threads` 模块并使用该对象的 `.postMessage()` 方法将消息传送给父线程。
+
+下面是一个例子：
+
+```js
+import { parentPort } from 'worker_threads'
+
+const data = {
+ // ...
+}
+
+parentPort.postMessage(data)
+```
+
+`parentPort` 是 Node.js 在后台为我们创建的 `MessagePort` 类的实例，用于支持与父线程的通信。通过这种方式，我们可以使用 `parentPort` 和 `woker` 对象在线程之间进行通信。
+
+第二种在线程间通信的方式其实是我们自己创建一个 `MessageChannel` 类的实例，然后将它发送给线程工作程序。下面是一个如何创建 `MessageChannel` 类的实例对象并在线程工作程序间共享的例子：
+
+```js
+import path from 'path'
+import { Worker, MessageChannel } from 'worker_threads'
+
+const worker = new Worker(path.join(__dirname, 'worker.js'))
+const { port1, port2 } = new MessageChannel()
+
+port1.on('message', (message) => {
+ console.log('message from worker:', message)
+})
+
+worker.postMessage({ port: port2 }, [port2])
+```
+
+
+
