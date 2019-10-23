@@ -323,7 +323,7 @@ console.log(workerData.property)
 
 到现在我们已经熟悉了 Node.js 线程机制中的技术细节，下面就让我们来实现一些有趣的功能并在实践中测试我们所学的知识吧。
 
-实现 `setTimeout`
+实现 setTimeout
 -----
 
 `setTimeout` 的本质其实是一个无限循环，在每一次循环中都会检查起始时间加上指定耗时是否小于当前时间。
@@ -369,7 +369,7 @@ function setTimeout(callback: (err: any) => any, time: number) {
    {
      time,
    },
- );
+ )
  timeoutState[id] = worker
  return id
 }
@@ -394,4 +394,3 @@ function cancelTimeout(id: string) {
 
 实现工作池
 -----
-
