@@ -394,3 +394,172 @@ function cancelTimeout(id: string) {
 
 实现工作池
 -----
+
+正如上面所提及的，工作池其实就是一系列的线程工作程序监听着 `message` 事件。一旦 `message` 事件被触发，就会执行相应的任务，之后再将结果返回。
+
+为了更好地描述我们将要实现的功能，下面是一段创建 8 个线程工作程序的代码：
+
+```ts
+const pool = new WorkerPool(path.join(__dirname, './test-worker.js'), 8)
+```
+
+如果你对[限制并发操作](https://www.freecodecamp.org/news/how-to-limit-concurrent-operations-in-javascript-b57d7b80d573/)熟悉的话，那么你将会见到相似的逻辑，只是用例不同而已。
+
+在上面的代码片段中，我们将线程工作程序的文件路径与需要生成的线程数以 `WorkerPool` 类的构造函数参数传入。
+
+```ts
+class WorkerPool<T, N> {
+ private queue: QueueItem<T, N>[] = []
+ private workersById: { [key: number]: Worker } = {}
+ private activeWorkersById: { [key: number]: boolean } = {}
+ public constructor(public workerPath: string, public numberOfThreads: number) {
+   this.init()
+ }
+}
+```
+
+在这里，我们有额外的属性比如 `workersById` 和 `activeWorkersById` ，它们能够保存已有的线程工作程序以及正在运行的线程工作程序 ID 。我们还维护了一个 `queue` ，用来保存像下面这种数据格式的对象：
+
+```ts
+type QueueCallback<N> = (err: any, result?: N) => void
+
+interface QueueItem<T, N> {
+ callback: QueueCallback<N>
+ getData: () => T
+}
+```
+
+`callback` 函数是默认的回调函数，第一个参数为错误处理消息 `error` ，第二个参数则是可能返回的结果。`getData` 函数是 `.run()` 方法的参数，当工作池中的线程开始运行时该方法就会被调用。`getData` 函数返回的结果会被传入工作线程中。
+
+在 `.init()` 方法中，我们创建了线程工作程序并将它们保存在相关的状态对象中：
+
+```ts
+private init() {
+  if (this.numberOfThreads < 1) {
+    return null
+  }
+  for (let i = 0; i < this.numberOfThreads; i += 1) {
+    const worker = new Worker(this.workerPath)
+    this.workersById[i] = worker
+    this.activeWorkersById[i] = false
+  }
+}
+```
+
+为了避免无限循环，我们需要确保线程数大于 1 。之后我们创建指定数量的线程并以索引作为键名将线程保存在 `workersById` 状态对象。`activeWorkersById` 的默认状态是 `false` 。
+
+现在我们需要实现 `.run()` 方法，以便在某个线程工作程序可用时执行相关的任务。
+
+```ts
+public run(getData: () => T) {
+  return new Promise<N>((resolve, reject) => {
+    const availableWorkerId = this.getInactiveWorkerId()
+    
+    const queueItem: QueueItem<T, N> = {
+      getData,
+      callback: (error, result) => {
+        if (error) {
+          return reject(error)
+        }
+        return resolve(result)
+      },
+    }
+    
+    if (availableWorkerId === -1) {
+      this.queue.push(queueItem)
+      return null
+    }
+    
+    this.runWorker(availableWorkerId, queueItem)
+  })
+}
+```
+
+在 promise 返回之后，我们首先会通过 `.getInactiveWorkerId()` 方法来检查是否有可用的线程工作程序：
+
+```ts
+private getInactiveWorkerId(): number {
+  for (let i = 0; i < this.numberOfThreads; i += 1) {
+    if (!this.activeWorkersById[i]) {
+      return i
+    }
+  }
+  return -1
+}
+```
+
+下一步我们会创建 `queueItem` 对象，其中包含了从 `.run()` 方法传入的 `getData` 函数以及 `callback` 函数。在 `callback` 函数中，我们要么 `resolve` 要么 `reject` 对应的 promise ，这取决于线程工作程序是否会传递错误到该函数中。
+
+如果没有可用的线程工作程序，我们便将 `queueItem` 推入 `queue` 中。如果可用，我们便调用 `.runWorker` 方法来运行线程工作程序。
+
+在 `runWorker` 方法中，我们将指定的 `activeWorkersById` 设置为 `true` ，为相应的线程工作程序初始化 `message` 事件与 `error` 事件（且在之后清理掉它们）。最后，我们将 `data` 发送至线程工作程序。 
+
+```ts
+private async runWorker(workerId: number, queueItem: QueueItem<T, N>) {
+ const worker = this.workersById[workerId]
+ this.activeWorkersById[workerId] = true
+  
+ const messageCallback = (result: N) => {
+   queueItem.callback(null, result)
+   cleanUp()
+ }
+ 
+ const errorCallback = (error: any) => {
+   queueItem.callback(error)
+   cleanUp()
+ }
+ 
+ const cleanUp = () => {
+   worker.removeAllListeners('message')
+   worker.removeAllListeners('error')
+   this.activeWorkersById[workerId] = false
+   if (!this.queue.length) {
+     return null
+   }
+   this.runWorker(workerId, this.queue.shift())
+ }
+ 
+ worker.once('message', messageCallback)
+ worker.once('error', errorCallback)
+ worker.postMessage(await queueItem.getData())
+}
+```
+
+首先，通过传入的 `workerId` ，我们从 `workersById` 对象中获得线程工作程序的引用。然后我们将 `activeWorkersById` 设置为 `true` ，以便说明该线程工作程序正在运行。
+
+然后我们为 `message` 和 `error` 事件创建相应的 `messageCallback` 和 `errorCallback` 函数，在监听相关事件的同时再将 `data` 发送至线程工作程序。
+
+在事件监听的回调函数中，我们调用 `queueItem` 的 `callback` 函数，之后再调用 `cleanUp` 函数。在 `cleanUp` 函数中，我们移除了所有的事件监听函数，因为在之前我们多次使用了同一个线程工作程序。如果不将事件监听函数移除，则会造成内存泄漏，最终导致内存耗尽。
+
+在 `activeWorkersById` 对象中，我们将相应的 `[workerId]` 属性设置为 `false` 并检查此时 `queue` 是否为空。如果不是，则取出 `queue` 中的第一个任务，将其作为新的 `queueItem` 再次调用 `runWorker` 方法。
+
+下面让我们来创建一个线程工作程序，用于在接收 `message` 事件的 `data` 之后，执行相关的计算。
+
+```ts
+import { isMainThread, parentPort } from 'worker_threads'
+
+if (isMainThread) {
+ throw new Error('Its not a worker')
+}
+
+const doCalcs = (data: any) => {
+ const collection = []
+ 
+ for (let i = 0; i < 1000000; i += 1) {
+   collection[i] = Math.round(Math.random() * 100000)
+ }
+  
+ return collection.sort((a, b) => {
+   if (a > b) {
+     return 1
+   }
+   return -1
+ })
+}
+
+parentPort.on('message', (data: any) => {
+ const result = doCalcs(data)
+ parentPort.postMessage(result)
+})
+```
+
