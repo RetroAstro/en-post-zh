@@ -563,3 +563,27 @@ parentPort.on('message', (data: any) => {
 })
 ```
 
+该线程工作程序创建了一个由 100 万个随机数组成的数组并将它们排序。其实我们并不关心具体做了什么，只要能够耗费一定的时间来完成该任务就行。
+
+下面是一个简单使用工作池的例子：
+
+```ts
+const pool = new WorkerPool<{ i: number }, number>(path.join(__dirname, './test-worker.js'), 8)
+const items = [...new Array(100)].fill(null)
+
+Promise.all(
+ items.map(async (_, i) => {
+   await pool.run(() => ({ i }))
+   console.log('finished', i)
+ }),
+).then(() => {
+ console.log('finished all')
+})
+```
+
+我们创建了一个带有 8 个线程工作程序的工作池。然后我们还生成了带有 100 个元素的数组，对于每个元素我们都在工作池中运行一个任务。第一次的时候，8 个任务很快就会被执行完，剩下的任务将会被推入 `queue` 中逐渐地被执行完毕。通过使用工作池，我们不必再为每个任务都创建线程工作程序，从而极大地提高了效率。
+
+结论
+-----
+
+`worker_threads` 模块以一种十分简单的方式让我们的应用程序能够支持多线程。通过委托的方式，我们将重 CPU 的任务交给其他线程去执行，这样一来我们便能显著地提高服务器吞吐量。有了官方的线程机制支持，我们可以期待更多来自 AI 、机器学习和大数据领域的开发人员与工程师开始使用 Node.js 。 
