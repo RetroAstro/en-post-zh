@@ -31,5 +31,5 @@
 
 **Node.js**
 
-[:book:]() [深入理解 Node.js 中的线程机制](./a-complete-guide-to-threads-in-node-js/index.md) 
+[:book:](./a-complete-guide-to-threads-in-node-js/words.md) [深入理解 Node.js 中的线程机制](./a-complete-guide-to-threads-in-node-js/index.md) 
 
