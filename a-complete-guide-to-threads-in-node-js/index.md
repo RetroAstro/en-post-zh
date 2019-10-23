@@ -323,3 +323,75 @@ console.log(workerData.property)
 
 到现在我们已经熟悉了 Node.js 线程机制中的技术细节，下面就让我们来实现一些有趣的功能并在实践中测试我们所学的知识吧。
 
+实现 `setTimeout`
+-----
+
+`setTimeout` 的本质其实是一个无限循环，在每一次循环中都会检查起始时间加上指定耗时是否小于当前时间。
+
+```ts
+import { parentPort, workerData } from 'worker_threads'
+
+const time = Date.now()
+
+while (true) {
+ if (time + workerData.time <= Date.now()) {
+   parentPort.postMessage({})
+   break
+ }
+}
+```
+
+我们在单独的线程中生成并执行这段代码，在完成之后便退出。
+
+下面让我们来完成能够使用该线程工作程序的逻辑代码。首先，我们会创建一个能够保存线程工作程序的状态对象。
+
+```ts
+const timeoutState: { [key: string]: Worker } = {}
+```
+
+然后在生成线程工作程序的函数中，我们将它们保存至状态对象。
+
+```ts
+function setTimeout(callback: (err: any) => any, time: number) {
+ const id = uuidv4()
+ const worker = runWorker(
+   path.join(__dirname, './timeout-worker.js'),
+   (err) => {
+     if (!timeoutState[id]) {
+       return null
+     }
+     timeoutState[id] = null
+     if (err) {
+       return callback(err)
+     }
+     callback(null)
+   },
+   {
+     time,
+   },
+ );
+ timeoutState[id] = worker
+ return id
+}
+```
+
+首先我们使用 UUID 库为每个线程工作程序创建唯一标识符，然后我们用先前的 `runWorker` 函数生成线程工作程序。同时我们将回调函数传入线程工作程序，当有事件被触发时该回调函数就会执行。最后我们将线程工作程序保存至状态对象并返回 `id` 。
+
+在回调函数中我们还需要检查线程工作程序是否仍然存在，因为我们可能会调用 `cancelTimeout` 函数来移除该线程工作程序。如果存在，我们便将其从状态对象中移除然后再调用从 `setTimeout` 函数中传入的 `callback` 函数。
+
+`cancelTimeout` 函数使用 `.terminate()` 方法来强制线程工作程序停止执行并将其从状态对象中移除。
+
+```ts
+function cancelTimeout(id: string) {
+ if (timeoutState[id]) {
+   timeoutState[id].terminate()
+   timeoutState[id] = undefined
+   return true
+ }
+ return false
+}
+```
+
+实现工作池
+-----
+
